@@ -44,7 +44,7 @@ In[5]: default_client.query(q)
 In the next section we will look at how to build CHP queries.
 
 ## Building Supported CHP Queries
-As CHP is TRAPI complinent a large subset of queries can be built with a wide variety of structures. In order to scope the query building problem, we have currently limited the structures of queries that can be asked and have detailed their respective semantics. *Note: A Translator and the Biolink model develop we intend to ease these restrictions.*
+As CHP is TRAPI complinent a large subset of queries can be built with a wide variety of structures. In order to scope the query building problem, we have currently limited the structures of queries that can be asked and have detailed their respective semantics. *Note: As Translator and the Biolink model develop we intend to ease these restrictions.*
 
 ### Standard Probablistic Query (One query, one result)
 TODO: single node of each type queries.
