@@ -6,7 +6,7 @@ The *chp_client* is a lightweight Python client for the NCATS Connections Hypoth
   - [requests](https://pypi.python.org/pypi/requests)
   
 ### Optional libraries
-  - [requests_cache](https://pypi.python.org/pypi/requests-cache) *Allows user to setup of requests caching.*
+  - [requests_cache](https://pypi.python.org/pypi/requests-cache) *(Allows user to setup of requests caching.)*
 
 ## Installation
 ### Option 1
@@ -48,6 +48,7 @@ As CHP is TRAPI complinent a large subset of queries can be built with a wide va
 
 ### Standard Probablistic Query (One query graph, one result)
 TODO: single node of each type queries.
+
 TODO: multiple node of each type queries.
 
 ### Gene Wildcard Query (One query, many results)
