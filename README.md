@@ -12,7 +12,7 @@ The *chp_client* is a lightweight Python client for the NCATS Connections Hypoth
 ### Option 1
 ``` python3 setup.py install ```
 ### Option 2
-```pip3 install -e git+https://github.com/di2ag/chp_client```
+```pip3 install -e git+https://github.com/di2ag/chp_client#egg=chp_client```
 
 ## Quick Start
 Once you have installed the CHP client, useage is as simple as:
