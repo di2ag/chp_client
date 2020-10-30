@@ -12,6 +12,12 @@ def load_query(filename):
         q = json.load(f_)
     return q
 
+def save_query(q, filename):
+    """ Saves a json query.
+    """
+    with open(filename, 'w') as f_:
+        json.dump(q, f_)
+    return filename
 
 def build_query(
         genes=None,
@@ -32,6 +38,10 @@ def build_query(
         therapeutic_wildcard: Boolean letting CHP know if it should try to find a statistically important therapeutic. Default: False.
 
     """
+    # Initialize
+    if genes is None:
+        genes = []
+
     # empty response
     message = {
             "query_graph": {},
@@ -40,20 +50,20 @@ def build_query(
             }
     # empty query graph
     message["query_graph"] = {
-            "edges": {},
-            "nodes": {}
+            "edges": [],
+            "nodes": []
             }
 
     # empty knowledge graph
     message["knowledge_graph"] = {
-            "edges": {},
-            "nodes": {}
+            "edges": [],
+            "nodes": []
             }
 
     # empty response graph
     message["results"] = {
-            "node_bindings": {},
-            "edge_bindings": {}
+            "node_bindings": [],
+            "edge_bindings": []
             }
 
     node_count = 0
@@ -109,7 +119,7 @@ def build_query(
             message["query_graph"]["edges"].append({
                     "id": 'e{}'.format(edge_count),
                     "type":'gene_to_disease_association',
-                    "source_id": node_id,
+                    "source_id": node["id"],
                     "target_id": 'n{}'.format(node_count - 1)   # should be disease node
                     })
             edge_count += 1
@@ -117,7 +127,7 @@ def build_query(
             message["query_graph"]["edges"].append({
                     "id": 'e{}'.format(edge_count),
                     "type":'chemical_to_disease_or_phenotypic_feature_association',
-                    "source_id": node_id,
+                    "source_id": node["id"],
                     "target_id": 'n{}'.format(node_count -1)  # should be disease node
                     })
             edge_count += 1
@@ -126,7 +136,7 @@ def build_query(
     outcome_curie, op, value = outcome
     message["query_graph"]["nodes"].append({
             "id": 'n{}'.format(node_count),
-            "type": 'phenotypicfeature',
+            "type": 'phenotypic_feature',
             "curie": outcome_curie,
             })
     node_count += 1
@@ -134,7 +144,7 @@ def build_query(
     # link disease to target
     message["query_graph"]["edges"].append({
             "id": 'e{}'.format(edge_count),
-            "type": 'disease_to_phenotype_association',
+            "type": 'disease_to_phenotypic_feature_association',
             "source_id": 'n{}'.format(node_count-2),
             "target_id": 'n{}'.format(node_count-1),
             "properties": {
@@ -142,6 +152,6 @@ def build_query(
                     "value": value
                     }
             })
-    return message
+    return {"message": message}
 
 

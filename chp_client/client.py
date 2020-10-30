@@ -33,7 +33,7 @@ class ChpClient:
         return from_cache, ret
 
     def _post(self, url, params, verbose=True):
-        res = requests.post(url, payload=params)
+        res = requests.post(url, json=params)
         from_cache = getattr(res, 'from_cache', False)
         ret = res.json()
         return from_cache, ret
@@ -50,6 +50,7 @@ class ChpClient:
         _url = self.url + self._query_endpoint
         verbose = kwargs.pop('verbose', True)
         q["max_results"] = kwargs.pop('max_results', 10)
+        q["message"]["reasoner_id"] = self._reasoner_id
         from_cache, out = self._post(_url, q, verbose=verbose)
         if verbose and from_cache:
             print('Result from cache.')
@@ -94,8 +95,8 @@ class ChpClient:
         """
         _url = self.url + self._curies_endpoint
         # Send reasoner_id in get payload
-        payload = {"reasoner_id": self.reasoner_id}
-        from_cache, ret = self._get(_url, payload=payload, verbose=verbose)
+        payload = {"reasoner_id": self._reasoner_id}
+        from_cache, ret = self._get(_url, params=payload, verbose=verbose)
         if verbose and from_cache:
             print('Result from cache.')
         return ret

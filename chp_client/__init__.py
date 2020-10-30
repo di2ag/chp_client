@@ -3,6 +3,9 @@ Generic Client for Connections Hypothesis API.
 """
 
 import types
+import copy
+
+from chp_client.client import ChpClient 
 
 # Function aliases common to all clients
 COMMON_ALIASES = {
@@ -18,15 +21,19 @@ COMMON_KWARGS = {
         "_default_url": 'http://chp.thayer.dartmouth.edu',
         "_query_endpoint": '/query/',
         "_predicates_endpoint": '/predicates/',
-        "_curies_endpoint": 'curies',
+        "_curies_endpoint": '/curies/',
         }
 
 # Reasoner specific kwargs
+DEFAULT_KWARGS = copy.copy(COMMON_KWARGS)
+DEFAULT_KWARGS.update({
+        "_reasoner_id": 'default',
+        })
 
 CLIENT_SETTINGS = {
         "default": {
                 "class_name": 'DefaultClient',
-                "class_kwargs": COMMON_KWARGS,
+                "class_kwargs": DEFAULT_KWARGS,
                 "attr_aliases": COMMON_ALIASES,
                 "base_class": ChpClient,
                 "mixins": []
@@ -56,12 +63,13 @@ def get_client(reasoner_id=None, instance=True, *args, **kwargs):
 
     All other args/kwargs are passed to the derived client instantiation (if applicable).
     """
-    if not reasoner_id:
-        resoner_id = 'default'
+    if reasoner_id is None:
+        reasoner_id = 'default'
     reasoner_id = reasoner_id.lower()
     if reasoner_id not in CLIENT_SETTINGS:
         raise Exception('No reasoner named {0}, currently available clients are {1}'.format(
                 reasoner_id, CLIENT_SETTINGS.keys()))
+    _settings = CLIENT_SETTINGS[reasoner_id]
     _class = type(_settings["class_name"], tuple([_settings["base_class"]] + _settings["mixins"]), _settings["class_kwargs"])
     for (src_attr, target_attr) in _settings["attr_aliases"].items():
         if getattr(_class, src_attr, False):
