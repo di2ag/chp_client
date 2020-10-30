@@ -44,10 +44,13 @@ In[5]: default_client.query(q)
 In the next section we will look at how to build CHP queries.
 
 ## Building Supported CHP Queries
-As CHP is TRAPI complinent a large subset of queries can be built with a wide variety of structures. In order to scope the query building problem, we have currently limited the structures of queries that can be asked and have detailed their respective semantics. *Note: As Translator and the Biolink model develop we intend to ease these restrictions.*
+As CHP is TRAPI compliant a large subset of queries can be built with a wide variety of structures. In order to scope the query building problem, we have currently limited the structures of queries that can be asked and have detailed their respective semantics. *Note: As the Translator and Biolink models develop we intend to ease these restrictions.*
 
 ### Standard Probablistic Query (One query, one result)
-TODO: single node of each type queries.
+Our standard query is a straight probabilistic query of the form *P(Outcome | Gene Mutations, Disease, Therapeutics, ...)*. We can see a graphical representation of a query below:
+
+<img src="media/qg-oneGene_oneDrug.png" width=600>
+
 
 TODO: multiple node of each type queries.
 
