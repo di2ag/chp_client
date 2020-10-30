@@ -26,13 +26,67 @@ Now that you have an instance of the client, you can determine which query graph
 
 ```python3
 In[3]: default_client.predicates()
-
+{
+  "gene": {
+    "disease": [
+      "gene_to_disease_association"
+    ]
+  },
+  "chemical_substance": {
+    "disease": [
+      "chemical_to_disease_or_phenotypic_feature_association"
+    ]
+  },
+  "disease": {
+    "phenotypic_feature": [
+      "disease_to_phenotypic_feature_association"
+    ]
+  }
+}
 ```
 
 And you can check the supported curies by:
 
 ```python3
 In[4]: default_client.curies()
+{
+  "chemical_substance": [
+    {
+      "name": "ZOLADEX",
+      "curie": "CHEMBL:CHEMBL1201247"
+    },
+    {
+      "name": "CYCLOPHOSPHAMIDE",
+      "curie": "CHEMBL:CHEMBL88"
+    }, ...
+  ]
+  "phenotypic_feature": [
+    {
+      "name": "survival_time",
+      "curie": "EFO:0000714"
+    }
+  ],
+  "disease": [
+    {
+      "name": "breast_cancer",
+      "curie": "MONDO:0007254"
+    }
+  ],
+  "gene": [
+    {
+      "name": "CLIP2",
+      "curie": "ENSEMBL:ENSG00000106665"
+    },
+    {
+      "name": "PI4KA",
+      "curie": "ENSEMBL:ENSG00000241973"
+    },
+    {
+      "name": "CELSR2",
+      "curie": "ENSEMBL:ENSG00000143126"
+    }, ...
+  ]
+}
 ```
 This function will return a dictionary of supported biolink entities (NamedThings) that are supported by CHP along with a list of curies for each type. The list will include both our internal CHP name for the entity along with its associated curie for better human readability. *Note: When building query graphs only specify the appropriate curie. There is no need to also specify our internal name that we provide.*
 
