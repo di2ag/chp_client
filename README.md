@@ -1,25 +1,25 @@
-## Introduction
+# Introduction
 The *chp_client* is a lightweight Python client for the NCATS Connections Hypothesis Provider (CHP). It is meant to be an easy-to-use wrapper utility to both run and build TRAPI queries the CHP web service will understand. Many of the CHP queries have been inspired by direct input from Translator ARAs and such ARAs may have their own dedicated CHP API client that returns results that they expect. However, there is also a default client that can handle generic CHP requests. 
 
-## Requirements
+# Requirements
   - Python >= 3.6
   - [requests](https://pypi.python.org/pypi/requests)
   
-### Optional libraries
+## Optional libraries
   - [requests_cache](https://pypi.python.org/pypi/requests-cache) *(Allows user to setup of requests caching.)*
 
-## Installation
-### Option 1
+# Installation
+## Option 1
 ``` python3 setup.py install ```
-### Option 2
+## Option 2
 ```pip3 install -e git+https://github.com/di2ag/chp_client#egg=chp_client```
 
-## Quick Start
+# Quick Start
 Once you have installed the CHP client, useage is as simple as:
 ``` python3
-In[1]: from chp_client import get_client
+In [1]: from chp_client import get_client
 
-In[2]: default_client = get_client()
+In [2]: default_client = get_client()
 ```
 
 Now that you have an instance of the client, you can determine which query graph edge predicates are currently supported by CHP with:
@@ -48,7 +48,7 @@ In[3]: default_client.predicates()
 And you can check the supported curies by:
 
 ```python3
-In[4]: default_client.curies()
+In [4]: default_client.curies()
 {
   "chemical_substance": [
     {
@@ -93,40 +93,52 @@ This function will return a dictionary of supported biolink entities (NamedThing
 Now that we know which curies and predicates are supported by CHP we can post a query to CHP via:
 
 ```python3
-In[5]: default_client.query(q)
+In [5]: default_client.query(q)
 ```
 In the next section we will look at how to build CHP queries.
 
-## Building Supported CHP Queries
+# Building Supported CHP Queries
 As CHP is TRAPI compliant a large subset of queries can be built with a wide variety of structures. In order to scope the query building problem, we have currently limited the structures of queries that can be asked and have detailed their respective semantics. *Note: As the Translator and Biolink models develop we intend to ease these restrictions.*
 
-### Standard Probablistic Query (One query, one result)
-#### Single Gene Queries
+## Standard Probablistic Query (One query, one result)
+### Single Gene Queries
 Our standard query is a straight probabilistic query of the form *P(Outcome | Gene Mutations, Disease, Therapeutics, ...)*. We can see a graphical representation of a query below:
 
 <img src="media/qg-oneGene_oneDrug.png" width=600>
 
-Notice, that the CHP is inherently a multi-hop knowledge provider. We can in the full contents of the query graph and return the appropriate response. In this case the respose will be a edge binding to the disease_to_phenotypic_feature_association in this query graph. Where the resultant calculated knowledge graph of this query graph will have a *has_confidence* attribute denoting the calculated probability for this query. The an example response from this type of query graph is below:
+Notice, that the CHP is inherently a multi-hop knowledge provider. We reason in the full contents of the query graph and return the appropriate response. In this case the respose will be a edge binding to the disease_to_phenotypic_feature_association in this query graph. Where the resultant calculated knowledge graph of this query graph will have a *has_confidence* attribute denoting the calculated probability for this query. We can build this query with the provided query module of the client with the following code:
+
+```python
+In [6]: from chp_client.query import build_query
+
+In [7]: q = build_query(
+   ...: genes=['ENSEMBL:ENSG00000132155'],
+   ...: therapeutic='CHEMBL:CHEMBL1201585',
+   ...: disease='MONDO:0007254',
+   ...: outcome=('EFO:0000714', '>=', 500)
+   )
+   
+In [8]: response = client.query(q)
+```
+
+An example response from this type of query graph is below:
 
 ```json
 {
   "message": {
     "query_graph": {
-      "edges": [
-        {
-          "id": "e0",
+      "edges": {
+        "e0": {
           "type": "gene_to_disease_association",
           "source_id": "n0",
           "target_id": "n2"
         },
-        {
-          "id": "e1",
+        "e1": {
           "type": "chemical_to_disease_or_phenotypic_feature_association",
           "source_id": "n1",
           "target_id": "n2"
         },
-        {
-          "id": "e2",
+        "e2": {
           "type": "disease_to_phenotypic_feature_association",
           "source_id": "n2",
           "target_id": "n3",
@@ -135,94 +147,109 @@ Notice, that the CHP is inherently a multi-hop knowledge provider. We can in the
             "value": 500
           }
         }
-      ],
-      "nodes": [
-        {
-          "id": "n0",
+      },
+      "nodes": {
+        "n0": {
           "type": "gene",
           "curie": "ENSEMBL:ENSG00000132155"
         },
-        {
-          "id": "n1",
+        "n1": {
           "type": "chemical_substance",
-          "curie": "CHEMBL:CHEMBL88"
+          "curie": "CHEMBL:CHEMBL1201585"
         },
-        {
-          "id": "n2",
+        "n2": {
           "type": "disease",
           "curie": "MONDO:0007254"
         },
-        {
-          "id": "n3",
+        "n3": {
           "type": "phenotypic_feature",
           "curie": "EFO:0000714"
         }
-      ]
+      }
     },
     "knowledge_graph": {
-      "edges": [
-        {
-          "id": "cff35aa2-3a95-4e84-aa33-18ef576025e8",
+      "edges": {
+        "kge0": {
           "type": "gene_to_disease_association",
-          "source_id": "7c89d32e-2a6e-4cbc-9ece-2ca07c6a458e",
-          "target_id": "1f5fa86b-ffa7-437c-9033-74d17c3f4795"
+          "source_id": "ENSEMBL:ENSG00000132155",
+          "target_id": "MONDO:0007254"
         },
-        {
-          "id": "51cc7d6b-c63e-458a-b4f4-53c3a6210b05",
+        "kge1": {
           "type": "chemical_to_disease_or_phenotypic_feature_association",
-          "source_id": "298b0b61-7e43-4334-9516-898c10708019",
-          "target_id": "1f5fa86b-ffa7-437c-9033-74d17c3f4795"
+          "source_id": "CHEMBL:CHEMBL1201585",
+          "target_id": "MONDO:0007254"
         },
-        {
-          "id": "08cf0382-a43f-4a5b-a556-7b934dc7eb36",
+        "kge2": {
           "type": "disease_to_phenotypic_feature_association",
-          "source_id": "1f5fa86b-ffa7-437c-9033-74d17c3f4795",
-          "target_id": "4110a6b6-6178-4321-9c12-f4b253b2727c",
+          "source_id": "MONDO:0007254",
+          "target_id": "EFO:0000714",
           "properties": {
             "qualifier": ">=",
             "value": 500
           },
-          "has_confidence_level": 0.999718157375553
+          "has_confidence_level": 1.0
         }
-      ],
-      "nodes": [
-        {
-          "id": "7c89d32e-2a6e-4cbc-9ece-2ca07c6a458e",
+      },
+      "nodes": {
+        "ENSEMBL:ENSG00000132155": {
           "type": "gene",
-          "curie": "ENSEMBL:ENSG00000132155",
           "name": "RAF1"
         },
-        {
-          "id": "298b0b61-7e43-4334-9516-898c10708019",
+        "CHEMBL:CHEMBL1201585": {
           "type": "chemical_substance",
-          "curie": "CHEMBL:CHEMBL88",
-          "name": "CYTOXAN"
+          "name": "TRASTUZUMAB"
         },
-        {
-          "id": "1f5fa86b-ffa7-437c-9033-74d17c3f4795",
-          "type": "disease",
-          "curie": "MONDO:0007254"
+        "MONDO:0007254": {
+          "type": "disease"
         },
-        {
-          "id": "4110a6b6-6178-4321-9c12-f4b253b2727c",
-          "type": "phenotypic_feature",
-          "curie": "EFO:0000714"
+        "EFO:0000714": {
+          "type": "phenotypic_feature"
         }
-      ]
+      }
     },
-    "results": {
-      "node_bindings": [],
-      "edge_bindings": [
-        {
-          "qg_id": "e2",
-          "kg_id": "08cf0382-a43f-4a5b-a556-7b934dc7eb36"
+    "results": [
+      {
+        "node_bindings": {
+          "n0": {
+            "kg_id": "ENSEMBL:ENSG00000132155"
+          },
+          "n1": {
+            "kg_id": "CHEMBL:CHEMBL1201585"
+          },
+          "n2": {
+            "kg_id": "MONDO:0007254"
+          },
+          "n3": {
+            "kg_id": "EFO:0000714"
+          }
+        },
+        "edge_bindings": {
+          "e0": {
+            "kg_id": "kge0"
+          },
+          "e1": {
+            "kg_id": "kge1"
+          },
+          "e2": {
+            "kg_id": "kge2"
+          }
         }
-      ]
-    }
+      }
+    ]
   }
 }
+
 ```
-#### Multi-Gene Queries
+
+#### Extracting Query Probability
+You can extract the probability of the query manually from the TRAPI response data from CHP, but we have also provided a helper method inside the client to assist in extracting this probability.
+
+```python
+In [10]: client.get_outcome_prob(response)
+Out[10]: 1.0
+```
+
+### Multi-Gene Queries
 As the CHP is inherenly multi-hop, we can easily add multiple genes to our query graph and calcuate the probability of a patient outcome in the presence of mutliple gene mutations. A sample query graph is below *(We have not graphed the edge labels for ease of view but they are there in the query graph)*:
 
 <img src="media/qg-manyGenes_oneDrug.png" width=600>
@@ -367,15 +394,15 @@ A result from the CHP will again be a single edge binding as in the single gene 
 }
 ```
 
-### Gene Wildcard Query (One query, many results)
+## Gene Wildcard Query (One query, many results)
 TODO: Contribution analysis ranked genes
 
-### Drug Wildcard Query (One query, many results)
+## Drug Wildcard Query (One query, many results)
 To come...
 
 
-## CHP Query Semantics
+# CHP Query Semantics
 TODO: Explain biolink edge semantics and node types
 
-## API Documentation
+# API Documentation
 TODO.
