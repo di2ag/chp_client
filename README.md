@@ -1043,4 +1043,5 @@ We hope to support the same type of wildcard queries for drugs/therauptics, but 
 TODO: Explain biolink edge semantics and node types
 
 # API Documentation
+* [CHP Client API Reference](docs/chp_client_reference.md)
 * [CHP API Github Docs](https://github.com/di2ag/ConnectionsHypothesisProviderAPI)
