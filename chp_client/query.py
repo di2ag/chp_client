@@ -50,40 +50,38 @@ def build_query(
             }
     # empty query graph
     message["query_graph"] = {
-            "edges": [],
-            "nodes": []
+            "edges": {},
+            "nodes": {}
             }
 
     # empty knowledge graph
     message["knowledge_graph"] = {
-            "edges": [],
-            "nodes": []
+            "edges": {},
+            "nodes": {}
             }
 
     # empty response graph
-    message["results"] = {
-            "node_bindings": [],
-            "edge_bindings": []
-            }
+    message["results"] = [{
+            "node_bindings": {},
+            "edge_bindings": {}
+            }]
 
     node_count = 0
     edge_count = 0
 
     # add genes
     for gene in genes:
-        message["query_graph"]["nodes"].append({
-                "id": 'n{}'.format(node_count),
+        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
                 "type":'gene',
                 "curie": gene
-                })
+                }
         node_count += 1
 
     # add gene wildcards (if applicable)
     for _ in range(num_gene_wildcards):
-        message["query_graph"]["nodes"].append({
-                "id": 'n{}'.format(node_count),
+        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
                 "type": 'gene'
-                })
+                }
         node_count += 1
 
 
@@ -98,52 +96,46 @@ def build_query(
         #node_count += 1
 
     else:
-        message["query_graph"]["nodes"].append({
-                "id": 'n{}'.format(node_count),
+        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
                 "type": 'chemical_substance',
                 "curie": therapeutic
-                })
+                }
         node_count += 1
 
     # add in disease node
-    message["query_graph"]["nodes"].append({
-            "id": 'n{}'.format(node_count),
+    message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
             "type": 'disease',
             "curie": disease
-            })
+            }
     node_count += 1
 
     # link all evidence to disease
-    for node in message["query_graph"]["nodes"]:
+    for node_id, node in message["query_graph"]["nodes"].items():
         if node["type"] == 'gene':
-            message["query_graph"]["edges"].append({
-                    "id": 'e{}'.format(edge_count),
+            message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
                     "type":'gene_to_disease_association',
-                    "source_id": node["id"],
+                    "source_id": node_id,
                     "target_id": 'n{}'.format(node_count - 1)   # should be disease node
-                    })
+                    }
             edge_count += 1
         elif node["type"] == 'chemical_substance':
-            message["query_graph"]["edges"].append({
-                    "id": 'e{}'.format(edge_count),
+            message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
                     "type":'chemical_to_disease_or_phenotypic_feature_association',
-                    "source_id": node["id"],
+                    "source_id": node_id,
                     "target_id": 'n{}'.format(node_count -1)  # should be disease node
-                    })
+                    }
             edge_count += 1
 
     # add target outcome node
     outcome_curie, op, value = outcome
-    message["query_graph"]["nodes"].append({
-            "id": 'n{}'.format(node_count),
+    message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
             "type": 'phenotypic_feature',
             "curie": outcome_curie,
-            })
+            }
     node_count += 1
 
     # link disease to target
-    message["query_graph"]["edges"].append({
-            "id": 'e{}'.format(edge_count),
+    message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
             "type": 'disease_to_phenotypic_feature_association',
             "source_id": 'n{}'.format(node_count-2),
             "target_id": 'n{}'.format(node_count-1),
@@ -151,7 +143,5 @@ def build_query(
                     "qualifier": op,
                     "value": value
                     }
-            })
+            }
     return {"message": message}
-
-
