@@ -12,6 +12,8 @@ COMMON_ALIASES = {
         "_query": 'query',
         "_predicates": 'predicates',
         "_curies": 'curies',
+        "_get_outcome_prob": 'get_outcome_prob',
+        "_get_ranked_wildcards": 'get_ranked_wildcards'
         }
 
 # Set reasoner specific aliases

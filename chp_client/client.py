@@ -2,6 +2,8 @@
 Python Client for generic CHP API services.
 """
 
+from collections import defaultdict
+
 import requests
 
 try:
@@ -100,6 +102,62 @@ class ChpClient:
         if verbose and from_cache:
             print('Result from cache.')
         return ret
+
+    def _get_outcome_prob(self, q_resp):
+        """ Extracts the probability from a CHP query response.
+        """
+        # Extract response. Probability is always in first result
+        kg = q_resp["message"]["knowledge_graph"]
+        res = q_resp["message"]["results"][0]
+        # Find the outcome edge
+        for qg_id, edge_bind  in res["edge_bindings"].items():
+            edge = kg["edges"][edge_bind["kg_id"]]
+            if edge["type"] == 'disease_to_phenotypic_feature_association':
+                try:
+                    prob = edge["has_confidence_level"]
+                    break
+                except KeyError:
+                    raise KeyError('Could not find associated probability of query. Possible ill-formed query.')
+        return prob
+
+    def _get_ranked_wildcards(self, q_resp):
+        """ Extracts ranked list of wildcards from a CHP query response.
+        """
+        if len(q_resp["results"]) < 2:
+            raise ValueError('Could not find any wildcard results. Possible ill-formed query. Consult documentation.')
+        qg = q_resp["message"]["query_graph"]
+        kg = q_resp["message"]["knowledge_graph"]
+        res = q_resp["message"]["results"][1:]
+        # Extract wildcard types from qg. Numbers are how many wildcard of each type are in qg.
+        wildcard_types = defaultdict(int)
+        for node_id, node in qg["nodes"].items():
+            if "curie" not in node:
+                wildcard_types[node["type"]] += 1
+        ranks = defaultdict(list)
+        for _res in res:
+            for qg_id, edge_bind in _res["edge_bindings"].items():
+                edge = kg["edges"][edge_bind["kg_id"]]
+                if "gene" in wildcard_types and edge["type"] == 'gene_to_disease_association':
+                    weight = edge["weight"]
+                    node_curie = edge["source_id"]
+                    source_node = kg["nodes"][node_curie]
+                    name = source_node["name"]
+                    ranks["gene"].append({
+                            "weight": weight,
+                            "curie": node_curie,
+                            "name": name})
+                elif "chemical_substance" in wildcard_types and edge["type"] == 'chemical_to_disease_or_phenotypic_feature_association':
+                    weight = edge["weight"]
+                    node_curie = edge["source_id"]
+                    source_node = kg["nodes"][node_curie]
+                    name = source_node["name"]
+                    ranks["gene"].append({
+                            "weight": weight,
+                            "curie": node_curie,
+                            "name": name})
+                else:
+                    continue
+        return ranks
 
     def _set_caching(self, cache_db=None, verbose=True, **kwargs):
         '''Installs a local cache for all requests.
