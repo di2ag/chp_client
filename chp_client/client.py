@@ -123,7 +123,7 @@ class ChpClient:
     def _get_ranked_wildcards(self, q_resp):
         """ Extracts ranked list of wildcards from a CHP query response.
         """
-        if len(q_resp["results"]) < 2:
+        if len(q_resp["message"]["results"]) < 2:
             raise ValueError('Could not find any wildcard results. Possible ill-formed query. Consult documentation.')
         qg = q_resp["message"]["query_graph"]
         kg = q_resp["message"]["knowledge_graph"]
