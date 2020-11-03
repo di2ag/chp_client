@@ -5,7 +5,7 @@
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Building Supported Queries](#building-supported-chp-queries)
-  - [Standard Queries](#single-gene-queries)
+  - [Standard Queries](#standard-probablistic-query-one-query-one-result)
     - [Single Gene Queries](#single-gene-queries)
     - [Multiple Gene Queries](#multi-gene-queries)
   - [Gene Wildcard Queries](#gene-wildcard-query-one-query-many-results)
