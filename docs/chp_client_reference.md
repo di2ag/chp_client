@@ -4,7 +4,7 @@
 
 **Date:** 11/3/2020
 
-This reference manual details functions, modules, and objects included in the CHP Client, describing what they are and what they do. For information on how to use CHP and the CHP client see the [main readme](../README.md).
+This reference manual details functions, modules, and objects included in the CHP Client, describing what they are and what they do. For information on how to use CHP and the CHP client see the [main readme](../README.md#introduction).
 
 - [chp_client](init.md)
   - [get_client](init.md#chp_clientget_client)
