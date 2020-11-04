@@ -6,8 +6,8 @@
 
 This reference manual details functions, modules, and objects included in the CHP Client, describing what they are and what they do. For information on how to use CHP and the CHP client see the [main readme](https://github.com/di2ag/chp_client).
 
-- [chp_client](chp_client.md)
-  - [get_client](chp_client.md#chp_clienyt.get_client)
+- [chp_client](init.md)
+  - [get_client](client.md#chp_clientclientchpclient)
 - [client](client.md)
   - [query](client.md#chpclientquery)
   - [predicates](client.md#chpclientpredicates)
