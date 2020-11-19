@@ -13,7 +13,7 @@ except ImportError:
     caching_avail = False
 
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 
 class ChpClient:
@@ -111,8 +111,8 @@ class ChpClient:
         res = q_resp["message"]["results"][0]
         # Find the outcome edge
         for qg_id, edge_bind  in res["edge_bindings"].items():
-            edge = kg["edges"][edge_bind["kg_id"]]
-            if edge["type"] == 'disease_to_phenotypic_feature_association':
+            edge = kg["edges"][edge_bind[0]["id"]]
+            if edge["predicate"] == 'biolink:DiseaseToPhenotypicFeatureAssociation':
                 try:
                     prob = edge["has_confidence_level"]
                     break
@@ -131,24 +131,24 @@ class ChpClient:
         # Extract wildcard types from qg. Numbers are how many wildcard of each type are in qg.
         wildcard_types = defaultdict(int)
         for node_id, node in qg["nodes"].items():
-            if "curie" not in node:
-                wildcard_types[node["type"]] += 1
+            if "id" not in node:
+                wildcard_types[node["category"]] += 1
         ranks = defaultdict(list)
         for _res in res:
             for qg_id, edge_bind in _res["edge_bindings"].items():
-                edge = kg["edges"][edge_bind["kg_id"]]
-                if "gene" in wildcard_types and edge["type"] == 'gene_to_disease_association':
-                    weight = edge["weight"]
-                    node_curie = edge["source_id"]
+                edge = kg["edges"][edge_bind[0]["id"]]
+                if "biolink:Gene" in wildcard_types and edge["predicate"] == 'biolink:GeneToDiseaseAssociation':
+                    weight = edge["value"]
+                    node_curie = edge["subject"]
                     source_node = kg["nodes"][node_curie]
                     name = source_node["name"]
                     ranks["gene"].append({
                             "weight": weight,
                             "curie": node_curie,
                             "name": name})
-                elif "chemical_substance" in wildcard_types and edge["type"] == 'chemical_to_disease_or_phenotypic_feature_association':
-                    weight = edge["weight"]
-                    node_curie = edge["source_id"]
+                elif "biolink:Drug" in wildcard_types and edge["predicate"] == 'biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation':
+                    weight = edge["value"]
+                    node_curie = edge["subject"]
                     source_node = kg["nodes"][node_curie]
                     name = source_node["name"]
                     ranks["gene"].append({

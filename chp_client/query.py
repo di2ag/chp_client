@@ -46,7 +46,7 @@ def build_query(
     message = {
             "query_graph": {},
             "knowledge_graph": {},
-            "results": {}
+            "results": []
             }
     # empty query graph
     message["query_graph"] = {
@@ -60,27 +60,21 @@ def build_query(
             "nodes": {}
             }
 
-    # empty response graph
-    message["results"] = [{
-            "node_bindings": {},
-            "edge_bindings": {}
-            }]
-
     node_count = 0
     edge_count = 0
 
     # add genes
     for gene in genes:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "type":'gene',
-                "curie": gene
+                "category":"biolink:Gene",
+                "id": gene
                 }
         node_count += 1
 
     # add gene wildcards (if applicable)
     for _ in range(num_gene_wildcards):
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "type": 'gene'
+                "category": 'biolink:Gene'
                 }
         node_count += 1
 
@@ -97,51 +91,51 @@ def build_query(
 
     else:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "type": 'chemical_substance',
-                "curie": therapeutic
+                "category": 'biolink:Drug',
+                "id": therapeutic
                 }
         node_count += 1
 
     # add in disease node
     message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "type": 'disease',
-            "curie": disease
+            "category": 'biolink:Disease',
+            "id": disease
             }
     node_count += 1
 
     # link all evidence to disease
     for node_id, node in message["query_graph"]["nodes"].items():
-        if node["type"] == 'gene':
+        if node["category"] == 'biolink:Gene':
             message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "type":'gene_to_disease_association',
-                    "source_id": node_id,
-                    "target_id": 'n{}'.format(node_count - 1)   # should be disease node
+                    "predicate":'biolink:GeneToDiseaseAssociation',
+                    "subject": node_id,
+                    "object": 'n{}'.format(node_count - 1)   # should be disease node
                     }
             edge_count += 1
-        elif node["type"] == 'chemical_substance':
+        elif node["category"] == 'biolink:Drug':
             message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "type":'chemical_to_disease_or_phenotypic_feature_association',
-                    "source_id": node_id,
-                    "target_id": 'n{}'.format(node_count -1)  # should be disease node
+                    "predicate":'biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation',
+                    "subject": node_id,
+                    "object": 'n{}'.format(node_count -1)  # should be disease node
                     }
             edge_count += 1
 
     # add target outcome node
     outcome_curie, op, value = outcome
     message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "type": 'phenotypic_feature',
-            "curie": outcome_curie,
+            "category": 'biolink:PhenotypicFeature',
+            "id": outcome_curie,
             }
     node_count += 1
 
     # link disease to target
     message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-            "type": 'disease_to_phenotypic_feature_association',
-            "source_id": 'n{}'.format(node_count-2),
-            "target_id": 'n{}'.format(node_count-1),
+            "predicate": 'biolink:DiseaseToPhenotypicFeatureAssociation',
+            "subject": 'n{}'.format(node_count-2),
+            "object": 'n{}'.format(node_count-1),
             "properties": {
-                    "qualifier": op,
-                    "value": value
-                    }
+                           "qualifier": op,
+                           "days": value
+                          }
             }
     return {"message": message}
