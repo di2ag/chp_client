@@ -6,7 +6,7 @@ import io
 from setuptools import find_packages
 from setuptools import setup
 
-__version__ = re.search(r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+__version__ = re.search(r'__version__\s*=\s*[\'"]([0-9]*\.[0-9]*\.[0-9]*)[\'"]',
                         io.open('chp_client/_version.py', encoding='utf_8_sig').read()).group(1)
 
 REQUIRED_PACKAGES = [
