@@ -5,7 +5,8 @@ Generic Client for Connections Hypothesis API.
 import types
 import copy
 
-from chp_client.client import ChpClient 
+from chp_client.client import ChpClient
+from chp_client._version import __version__
 
 # Function aliases common to all clients
 COMMON_ALIASES = {
