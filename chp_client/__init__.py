@@ -25,6 +25,7 @@ COMMON_KWARGS = {
         "_query_endpoint": '/query/',
         "_predicates_endpoint": '/predicates/',
         "_curies_endpoint": '/curies/',
+        "_versions_endpoint": '/versions/',
         }
 
 # Reasoner specific kwargs
