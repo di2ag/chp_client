@@ -3,8 +3,11 @@ Python Client for generic CHP API services.
 """
 
 from collections import defaultdict
+from chp_client._version import __version__
 
 import requests
+import sys
+import warnings
 
 try:
     import requests_cache
@@ -12,16 +15,25 @@ try:
 except ImportError:
     caching_avail = False
 
-
-__version__ = '0.0.2'
-
-
 class ChpClient:
     """
     The client for the CHP API web service.
     """
 
     def __init__(self, url=None):
+
+        # check for appropriate version
+        package_versions = self._versions(verbose=True)
+        endpoint_version = package_versions['chp_client']
+        endpoint_version_split = [int(x) for x in endpoint_version.split('.')]
+        local_version_split = [int(x) for x in __version__.split('.')]
+        if endpoint_version_split[0] != local_version_split[0]:
+            sys.exit('Major version deviation in chp_client. Please update chp_client to grab the newest version')
+        elif endpoint_version_split[1] != local_version_split[1]:
+            sys.exit('Minor version deviation in chp_client. Please update chp_client to grab the newest version')
+        elif endpoint_version_split[2] != local_version_split[2]:
+            warnings.warn('Patch version deviation in chp_client. Please update chp_client to grab the newest version or run at your own risk!')
+
         if url is None:
             url = self._default_url
         self.url = url
@@ -99,6 +111,15 @@ class ChpClient:
         # Send reasoner_id in get payload
         payload = {"reasoner_id": self._reasoner_id}
         from_cache, ret = self._get(_url, params=payload, verbose=verbose)
+        if verbose and from_cache:
+            print('Result from cache.')
+        return ret
+
+    def _versions(self, verbose=True, **kwargs):
+        """ Returns a dictionary of all enpoint dependency versions
+        """
+        _url = self.url + self._versions_endpoint
+        from_cache, ret = self._get(_url, verbose=verbose)
         if verbose and from_cache:
             print('Result from cache.')
         return ret
