@@ -22,6 +22,11 @@ class ChpClient:
 
     def __init__(self, url=None):
 
+        if url is None:
+            url = self._default_url
+        self.url = url
+        self._cached = False
+
         # check for appropriate version
         package_versions = self._versions(verbose=True)
         endpoint_version = package_versions['chp_client']
@@ -34,15 +39,11 @@ class ChpClient:
         elif endpoint_version_split[2] != local_version_split[2]:
             warnings.warn('Patch version deviation in chp_client. Please update chp_client to grab the newest version or run at your own risk!')
 
-        if url is None:
-            url = self._default_url
-        self.url = url
-        self._cached = False
-
     def _get(self, url, params=None, verbose=True):
         params = params or {}
         res = requests.get(url, json=params)
         from_cache = getattr(res, 'from_cache', False)
+        print(res)
         ret = res.json()
         return from_cache, ret
 
