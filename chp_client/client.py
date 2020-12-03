@@ -43,7 +43,6 @@ class ChpClient:
         params = params or {}
         res = requests.get(url, json=params)
         from_cache = getattr(res, 'from_cache', False)
-        print(res)
         ret = res.json()
         return from_cache, ret
 
