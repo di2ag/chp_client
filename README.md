@@ -68,40 +68,40 @@ And you can check the supported curies by:
 ```python3
 In [4]: default_client.curies()
 {
-  "chemical_substance": [
+  "biolink:Drug": [
     {
       "name": "ZOLADEX",
-      "curie": "CHEMBL:CHEMBL1201247"
+      "id": "CHEMBL:CHEMBL1201247"
     },
     {
       "name": "CYCLOPHOSPHAMIDE",
-      "curie": "CHEMBL:CHEMBL88"
+      "id": "CHEMBL:CHEMBL88"
     }, ...
   ]
-  "phenotypic_feature": [
+  "biolink:PhenotypicFeature": [
     {
       "name": "survival_time",
-      "curie": "EFO:0000714"
+      "id": "EFO:0000714"
     }
   ],
-  "disease": [
+  "biolink:Disease": [
     {
       "name": "breast_cancer",
-      "curie": "MONDO:0007254"
+      "id": "MONDO:0007254"
     }
   ],
-  "gene": [
+  "biolink:Gene": [
     {
       "name": "CLIP2",
-      "curie": "ENSEMBL:ENSG00000106665"
+      "id": "ENSEMBL:ENSG00000106665"
     },
     {
       "name": "PI4KA",
-      "curie": "ENSEMBL:ENSG00000241973"
+      "id": "ENSEMBL:ENSG00000241973"
     },
     {
       "name": "CELSR2",
-      "curie": "ENSEMBL:ENSG00000143126"
+      "id": "ENSEMBL:ENSG00000143126"
     }, ...
   ]
 }
