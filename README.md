@@ -42,19 +42,22 @@ Now that you have an instance of the client, you can determine which query graph
 ```python3
 In[3]: default_client.predicates()
 {
-  "gene": {
-    "disease": [
-      "gene_to_disease_association"
+  "biolink:Drug": {
+    "biolink:Gene": [
+      "biolink:ChemicalToGeneAssociation"
+    ],
+    "biolink:Disease": [
+      "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation"
     ]
   },
-  "chemical_substance": {
-    "disease": [
-      "chemical_to_disease_or_phenotypic_feature_association"
+  "biolink:Disease": {
+    "biolink:PhenotypicFeature": [
+      "biolink:DiseaseToPhenotypicFeatureAssociation"
     ]
   },
-  "disease": {
-    "phenotypic_feature": [
-      "disease_to_phenotypic_feature_association"
+  "biolink:Gene": {
+    "biolink:Disease": [
+      "biolink:GeneToDiseaseAssociation"
     ]
   }
 }
