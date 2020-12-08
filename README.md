@@ -304,163 +304,180 @@ In [11]: response = client.query(q)
 A sample json response from this multi-gene query is below:
 
 ```json
-{
-  "message": {
+"message": {
     "query_graph": {
       "edges": {
         "e0": {
-          "type": "gene_to_disease_association",
-          "source_id": "n0",
-          "target_id": "n4"
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "n0",
+          "object": "n4"
         },
         "e1": {
-          "type": "gene_to_disease_association",
-          "source_id": "n1",
-          "target_id": "n4"
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "n1",
+          "object": "n4"
         },
         "e2": {
-          "type": "gene_to_disease_association",
-          "source_id": "n2",
-          "target_id": "n4"
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "n2",
+          "object": "n4"
         },
         "e3": {
-          "type": "chemical_to_disease_or_phenotypic_feature_association",
-          "source_id": "n3",
-          "target_id": "n4"
+          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+          "subject": "n3",
+          "object": "n4"
         },
         "e4": {
-          "type": "disease_to_phenotypic_feature_association",
-          "source_id": "n4",
-          "target_id": "n5",
+          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
+          "subject": "n4",
+          "object": "n5",
           "properties": {
             "qualifier": ">=",
-            "value": 500
+            "days": 500
           }
         }
       },
       "nodes": {
         "n0": {
-          "type": "gene",
-          "curie": "ENSEMBL:ENSG00000132155"
+          "category": "biolink:Gene",
+          "id": "ENSEMBL:ENSG00000132155"
         },
         "n1": {
-          "type": "gene",
-          "curie": "ENSEMBL:ENSG00000196557"
+          "category": "biolink:Gene",
+          "id": "ENSEMBL:ENSG00000196557"
         },
         "n2": {
-          "type": "gene",
-          "curie": "ENSEMBL:ENSG00000141510"
+          "category": "biolink:Gene",
+          "id": "ENSEMBL:ENSG00000196557"
         },
         "n3": {
-          "type": "chemical_substance",
-          "curie": "CHEMBL:CHEMBL1201585"
+          "category": "biolink:Drug",
+          "id": "CHEMBL:CHEMBL1201585"
         },
         "n4": {
-          "type": "disease",
-          "curie": "MONDO:0007254"
+          "category": "biolink:Disease",
+          "id": "MONDO:0007254"
         },
         "n5": {
-          "type": "phenotypic_feature",
-          "curie": "EFO:0000714"
+          "category": "biolink:PhenotypicFeature",
+          "id": "EFO:0000714"
         }
       }
     },
     "knowledge_graph": {
       "edges": {
         "kge0": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000132155",
-          "target_id": "MONDO:0007254"
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "ENSEMBL:ENSG00000132155",
+          "object": "MONDO:0007254"
         },
         "kge1": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000196557",
-          "target_id": "MONDO:0007254"
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "ENSEMBL:ENSG00000196557",
+          "object": "MONDO:0007254"
         },
         "kge2": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000141510",
-          "target_id": "MONDO:0007254"
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "ENSEMBL:ENSG00000196557",
+          "object": "MONDO:0007254"
         },
         "kge3": {
-          "type": "chemical_to_disease_or_phenotypic_feature_association",
-          "source_id": "CHEMBL:CHEMBL1201585",
-          "target_id": "MONDO:0007254"
+          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+          "subject": "CHEMBL:CHEMBL1201585",
+          "object": "MONDO:0007254"
         },
         "kge4": {
-          "type": "disease_to_phenotypic_feature_association",
-          "source_id": "MONDO:0007254",
-          "target_id": "EFO:0000714",
+          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
+          "subject": "MONDO:0007254",
+          "object": "EFO:0000714",
           "properties": {
             "qualifier": ">=",
-            "value": 500
+            "days": 500
           },
-          "has_confidence_level": -1
+          "has_confidence_level": 0.9933692865352313
         }
       },
       "nodes": {
         "ENSEMBL:ENSG00000132155": {
-          "type": "gene",
+          "category": "biolink:Gene",
           "name": "RAF1"
         },
         "ENSEMBL:ENSG00000196557": {
-          "type": "gene",
+          "category": "biolink:Gene",
           "name": "CACNA1H"
         },
-        "ENSEMBL:ENSG00000141510": {
-          "type": "gene",
-          "name": "TP53"
-        },
         "CHEMBL:CHEMBL1201585": {
-          "type": "chemical_substance",
+          "category": "biolink:Drug",
           "name": "TRASTUZUMAB"
         },
         "MONDO:0007254": {
-          "type": "disease"
+          "category": "biolink:Disease"
         },
         "EFO:0000714": {
-          "type": "phenotypic_feature"
+          "category": "biolink:PhenotypicFeature"
         }
       }
     },
     "results": [
       {
-        "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000132155"
-          },
-          "n1": {
-            "kg_id": "ENSEMBL:ENSG00000196557"
-          },
-          "n2": {
-            "kg_id": "ENSEMBL:ENSG00000141510"
-          },
-          "n3": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n4": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n5": {
-            "kg_id": "EFO:0000714"
-          }
-        },
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge0"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          },
-          "e3": {
-            "kg_id": "kge3"
-          },
-          "e4": {
-            "kg_id": "kge4"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge1"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge2"
+            }
+          ],
+          "e3": [
+            {
+              "id": "kge3"
+            }
+          ],
+          "e4": [
+            {
+              "id": "kge4"
+            }
+          ]
+        },
+        "node_bindings": {
+          "n0": [
+            {
+              "id": "ENSEMBL:ENSG00000132155"
+            }
+          ],
+          "n1": [
+            {
+              "id": "ENSEMBL:ENSG00000196557"
+            }
+          ],
+          "n2": [
+            {
+              "id": "ENSEMBL:ENSG00000196557"
+            }
+          ],
+          "n3": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n4": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n5": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       }
     ]
