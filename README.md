@@ -521,475 +521,614 @@ The sample json response from this query is:
     "query_graph": {
       "edges": {
         "e0": {
-          "type": "gene_to_disease_association",
-          "source_id": "n0",
-          "target_id": "n2"
-        },
-        "e1": {
-          "type": "chemical_to_disease_or_phenotypic_feature_association",
-          "source_id": "n1",
-          "target_id": "n2"
-        },
-        "e2": {
-          "type": "disease_to_phenotypic_feature_association",
-          "source_id": "n2",
-          "target_id": "n3",
+          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
+          "subject": "n2",
+          "object": "n3",
           "properties": {
             "qualifier": ">=",
-            "value": 500
+            "days": 500
           }
+        },
+        "e1": {
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "n1",
+          "object": "n2"
+        },
+        "e2": {
+          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+          "subject": "n0",
+          "object": "n2"
         }
       },
       "nodes": {
         "n0": {
-          "type": "gene"
+          "category": "biolink:Drug",
+          "id": "CHEMBL:CHEMBL1201585"
         },
         "n1": {
-          "type": "chemical_substance",
-          "curie": "CHEMBL:CHEMBL1201585"
+          "category": "biolink:Gene"
         },
         "n2": {
-          "type": "disease",
-          "curie": "MONDO:0007254"
+          "category": "biolink:Disease",
+          "id": "MONDO:0007254"
         },
         "n3": {
-          "type": "phenotypic_feature",
-          "curie": "EFO:0000714"
+          "category": "biolink:PhenotypicFeature",
+          "id": "EFO:0000714"
         }
       }
     },
     "knowledge_graph": {
       "edges": {
         "kge0": {
-          "type": "gene_to_disease_association",
-          "source_id": null,
-          "target_id": "MONDO:0007254"
-        },
-        "kge1": {
-          "type": "chemical_to_disease_or_phenotypic_feature_association",
-          "source_id": "CHEMBL:CHEMBL1201585",
-          "target_id": "MONDO:0007254"
-        },
-        "kge2": {
-          "type": "disease_to_phenotypic_feature_association",
-          "source_id": "MONDO:0007254",
-          "target_id": "EFO:0000714",
+          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
+          "subject": "MONDO:0007254",
+          "object": "EFO:0000714",
           "properties": {
             "qualifier": ">=",
-            "value": 500
+            "days": 500
           },
-          "has_confidence_level": 0.9
+          "has_confidence_level": 0.8412698412698413
+        },
+        "kge1": {
+          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+          "subject": "CHEMBL:CHEMBL1201585",
+          "object": "MONDO:0007254"
+        },
+        "kge3": {
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "MUC16",
+          "object": "MONDO:0007254",
+          "value": -0.12169811320754698
         },
         "kge4": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000141510",
-          "target_id": "MONDO:0007254",
-          "weight": 0.24999999999999997
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "ABCA8",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge5": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000121879",
-          "target_id": "MONDO:0007254",
-          "weight": 0.15
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "NAV1",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge6": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000155657",
-          "target_id": "MONDO:0007254",
-          "weight": 0.11666666666666665
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "MYEF2",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge7": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000145675",
-          "target_id": "MONDO:0007254",
-          "weight": 0.08333333333333333
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "ROBO1",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge8": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000102053",
-          "target_id": "MONDO:0007254",
-          "weight": 0.05
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "DNAH11",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge9": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000169064",
-          "target_id": "MONDO:0007254",
-          "weight": 0.05
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "MYH6",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge10": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000104517",
-          "target_id": "MONDO:0007254",
-          "weight": 0.05
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "CXorf36",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge11": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000165699",
-          "target_id": "MONDO:0007254",
-          "weight": 0.05
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "ARFGEF2",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         },
         "kge12": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000159216",
-          "target_id": "MONDO:0007254",
-          "weight": 0.05
-        },
-        "kge13": {
-          "type": "gene_to_disease_association",
-          "source_id": "ENSEMBL:ENSG00000155093",
-          "target_id": "MONDO:0007254",
-          "weight": 0.05
+          "predicate": "biolink:GeneToDiseaseAssociation",
+          "subject": "MYH15",
+          "object": "MONDO:0007254",
+          "value": -0.09999999999999983
         }
       },
       "nodes": {
         "CHEMBL:CHEMBL1201585": {
-          "type": "chemical_substance",
+          "category": "biolink:Drug",
           "name": "TRASTUZUMAB"
         },
         "MONDO:0007254": {
-          "type": "disease"
+          "category": "biolink:Disease"
         },
         "EFO:0000714": {
-          "type": "phenotypic_feature"
+          "category": "biolink:PhenotypicFeature"
         },
-        "ENSEMBL:ENSG00000141510": {
-          "type": "gene",
-          "name": "TP53"
+        "MUC16": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000181143"
         },
-        "ENSEMBL:ENSG00000121879": {
-          "type": "gene",
-          "name": "PIK3CA"
+        "ABCA8": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000141338"
         },
-        "ENSEMBL:ENSG00000155657": {
-          "type": "gene",
-          "name": "TTN"
+        "NAV1": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000134369"
         },
-        "ENSEMBL:ENSG00000145675": {
-          "type": "gene",
-          "name": "PIK3R1"
+        "MYEF2": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000104177"
         },
-        "ENSEMBL:ENSG00000102053": {
-          "type": "gene",
-          "name": "ZC3H12B"
+        "ROBO1": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000169855"
         },
-        "ENSEMBL:ENSG00000169064": {
-          "type": "gene",
-          "name": "ZBBX"
+        "DNAH11": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000105877"
         },
-        "ENSEMBL:ENSG00000104517": {
-          "type": "gene",
-          "name": "UBR5"
+        "MYH6": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000197616"
         },
-        "ENSEMBL:ENSG00000165699": {
-          "type": "gene",
-          "name": "TSC1"
+        "CXorf36": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000147113"
         },
-        "ENSEMBL:ENSG00000159216": {
-          "type": "gene",
-          "name": "RUNX1"
+        "ARFGEF2": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000124198"
         },
-        "ENSEMBL:ENSG00000155093": {
-          "type": "gene",
-          "name": "PTPRN2"
+        "MYH15": {
+          "category": "biolink:Gene",
+          "name": "ENSEMBL:ENSG00000144821"
         }
       }
     },
     "results": [
       {
-        "node_bindings": {
-          "n0": {
-            "kg_id": "None"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
-        },
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge0"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
+        },
+        "node_bindings": {
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge4"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge3"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000141510"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "MUC16"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge5"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge4"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000121879"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "ABCA8"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge6"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge5"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000155657"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "NAV1"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge7"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge6"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000145675"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "MYEF2"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge8"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge7"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000102053"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "ROBO1"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge9"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge8"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000169064"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "DNAH11"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge10"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge9"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000104517"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "MYH6"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge11"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge10"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000165699"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "CXorf36"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge12"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge11"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000159216"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "ARFGEF2"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       },
       {
         "edge_bindings": {
-          "e0": {
-            "kg_id": "kge13"
-          },
-          "e1": {
-            "kg_id": "kge1"
-          },
-          "e2": {
-            "kg_id": "kge2"
-          }
+          "e0": [
+            {
+              "id": "kge0"
+            }
+          ],
+          "e1": [
+            {
+              "id": "kge12"
+            }
+          ],
+          "e2": [
+            {
+              "id": "kge1"
+            }
+          ]
         },
         "node_bindings": {
-          "n0": {
-            "kg_id": "ENSEMBL:ENSG00000155093"
-          },
-          "n1": {
-            "kg_id": "CHEMBL:CHEMBL1201585"
-          },
-          "n2": {
-            "kg_id": "MONDO:0007254"
-          },
-          "n3": {
-            "kg_id": "EFO:0000714"
-          }
+          "n0": [
+            {
+              "id": "CHEMBL:CHEMBL1201585"
+            }
+          ],
+          "n1": [
+            {
+              "id": "MYH15"
+            }
+          ],
+          "n2": [
+            {
+              "id": "MONDO:0007254"
+            }
+          ],
+          "n3": [
+            {
+              "id": "EFO:0000714"
+            }
+          ]
         }
       }
     ]
@@ -1004,7 +1143,7 @@ You can extract this information manually from the TRAPI CHP response results se
 
 ```python
 In [15]: client.get_outcome_prob(response)
-Out[15]: 0.9
+Out[15]: 0.8412698412698413
 ```
 
 The next *n* results are the ranked gene graphs where the gene wildcard has been replaced by a gene instantiation by CHP, while also adding an edge weight (contributation value) to the associated *gene_to_disease_association* edge. We can further extract this ranked list of genes with the *get_ranked_wildcards* chp client helper function.
@@ -1014,56 +1153,56 @@ In [16]: ranked = client.get_ranked_wildcards(response)
 
 In [17]: print(json.dumps(ranked, indent=2))
 {
-  "gene": [
+  "Biolink:Gene": [
     {
-      "weight": 0.24999999999999997,
-      "curie": "ENSEMBL:ENSG00000141510",
-      "name": "TP53"
+      "weight": -0.12169811320754698,
+      "id": "ENSEMBL:ENSG00000181143",
+      "name": "MUC16"
     },
     {
-      "weight": 0.15,
-      "curie": "ENSEMBL:ENSG00000121879",
-      "name": "PIK3CA"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000141338",
+      "name": "ABCA8"
     },
     {
-      "weight": 0.11666666666666665,
-      "curie": "ENSEMBL:ENSG00000155657",
-      "name": "TTN"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000134369",
+      "name": "NAV1"
     },
     {
-      "weight": 0.08333333333333333,
-      "curie": "ENSEMBL:ENSG00000145675",
-      "name": "PIK3R1"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000104177",
+      "name": "MYEF2"
     },
     {
-      "weight": 0.05,
-      "curie": "ENSEMBL:ENSG00000102053",
-      "name": "ZC3H12B"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000169855",
+      "name": "ROBO1"
     },
     {
-      "weight": 0.05,
-      "curie": "ENSEMBL:ENSG00000169064",
-      "name": "ZBBX"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000105877",
+      "name": "DNAH11"
     },
     {
-      "weight": 0.05,
-      "curie": "ENSEMBL:ENSG00000104517",
-      "name": "UBR5"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000197616",
+      "name": "MYH6"
     },
     {
-      "weight": 0.05,
-      "curie": "ENSEMBL:ENSG00000165699",
-      "name": "TSC1"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000147113",
+      "name": "CXorf36"
     },
     {
-      "weight": 0.05,
-      "curie": "ENSEMBL:ENSG00000159216",
-      "name": "RUNX1"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000124198",
+      "name": "ARFGEF2"
     },
     {
-      "weight": 0.05,
-      "curie": "ENSEMBL:ENSG00000155093",
-      "name": "PTPRN2"
+      "weight": -0.09999999999999983,
+      "id": "ENSEMBL:ENSG00000144821",
+      "name": "MYH15"
     }
   ]
 }
