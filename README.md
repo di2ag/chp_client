@@ -295,7 +295,7 @@ In [10]: q = build_query(
    ...: genes=['ENSEMBL:ENSG00000132155', 'ENSEMBL:ENSG00000196557', 'ENSEMBL:ENSG00000141510'],
    ...: therapeutic='CHEMBL:CHEMBL1201585',
    ...: disease='MONDO:0007254',
-   ...: outcome=('EFO:0000714', '>=', 500)
+   ...: outcome=('EFO:0000714', '>=', 2000)
    )
    
 In [11]: response = client.query(q)
@@ -394,7 +394,7 @@ A sample json response from this multi-gene query is below:
             "qualifier": ">=",
             "days": 500
           },
-          "has_confidence_level": 0.9933692865352313
+          "has_confidence_level": -1
         }
       },
       "nodes": {
