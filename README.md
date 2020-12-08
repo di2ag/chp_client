@@ -278,7 +278,7 @@ You can extract the probability of the query manually from the TRAPI response da
 
 ```python
 In [9]: client.get_outcome_prob(response)
-Out[9]: 1.0
+Out[9]: 0.9658314350797266
 ```
 
 The interpretation of this probability is that all patients in our dataset with a somatic mutation in RAF1 gene that took herceptin survived for more than 500 days after initial diagnosis.
