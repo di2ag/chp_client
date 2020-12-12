@@ -81,15 +81,12 @@ def build_query(
 
     # add drugs
     if therapeutic_wildcard:
-        raise NotImplementedError('Currently therapeutic wildcards are not supported.')
-        #TODO: Add drug wildcards to CHP
-        #message["query_graph"]["nodes"].append({
-        #        "type": 'chemical_substance',
-        #        "id": 'n{}'.format(node_count),
-        #        }
-        #node_count += 1
+        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
+            "category": 'biolink:Drug',
+                }
+        node_count += 1
 
-    else:
+    elif therapeutic is not None:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
                 "category": 'biolink:Drug',
                 "id": therapeutic
