@@ -31,7 +31,7 @@ logger.info('Got curies.')
 # Build all simple single gene, single drug, breast cancer, survival queries.
 queries = []
 for _ in range(NUM_QUERIES):
-    therapeutic=random.choice(list(curies["chemical_substance"].keys()))
+    therapeutic=random.choice(list(curies["biolink:Drug"].keys()))
     q = build_query(
         therapeutic=therapeutic,
         disease='MONDO:0007254',
