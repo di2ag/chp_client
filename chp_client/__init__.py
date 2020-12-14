@@ -11,6 +11,7 @@ from chp_client._version import __version__
 # Function aliases common to all clients
 COMMON_ALIASES = {
         "_query": 'query',
+        "_query_all": 'query_all',
         "_predicates": 'predicates',
         "_curies": 'curies',
         "_get_outcome_prob": 'get_outcome_prob',
@@ -23,6 +24,7 @@ COMMON_ALIASES = {
 COMMON_KWARGS = {
         "_default_url": 'http://chp.thayer.dartmouth.edu',
         "_query_endpoint": '/query/',
+        "_query_all_endpoint": '/queryall/',
         "_predicates_endpoint": '/predicates/',
         "_curies_endpoint": '/curies/',
         "_versions_endpoint": '/versions/',
@@ -31,7 +33,7 @@ COMMON_KWARGS = {
 # Reasoner specific kwargs
 DEFAULT_KWARGS = copy.copy(COMMON_KWARGS)
 DEFAULT_KWARGS.update({
-        "_reasoner_id": 'default',
+        "_client_id": 'default',
         })
 
 CLIENT_SETTINGS = {
@@ -56,7 +58,7 @@ def copy_func(f, name=None):
     return fn
 
 
-def get_client(reasoner_id=None, instance=True, *args, **kwargs):
+def get_client(client_id=None, instance=True, *args, **kwargs):
     """ Function to return a new python client for the CHP API.
 
     Args:
@@ -67,13 +69,13 @@ def get_client(reasoner_id=None, instance=True, *args, **kwargs):
 
     All other args/kwargs are passed to the derived client instantiation (if applicable).
     """
-    if reasoner_id is None:
-        reasoner_id = 'default'
-    reasoner_id = reasoner_id.lower()
-    if reasoner_id not in CLIENT_SETTINGS:
+    if client_id is None:
+        client_id = 'default'
+    client_id = client_id.lower()
+    if client_id not in CLIENT_SETTINGS:
         raise Exception('No reasoner named {0}, currently available clients are {1}'.format(
                 reasoner_id, CLIENT_SETTINGS.keys()))
-    _settings = CLIENT_SETTINGS[reasoner_id]
+    _settings = CLIENT_SETTINGS[client_id]
     _class = type(_settings["class_name"], tuple([_settings["base_class"]] + _settings["mixins"]), _settings["class_kwargs"])
     for (src_attr, target_attr) in _settings["attr_aliases"].items():
         if getattr(_class, src_attr, False):

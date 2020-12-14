@@ -52,6 +52,28 @@ class ChpClient:
         ret = res.json()
         return from_cache, ret
 
+    def _query_all(self, queries, **kwargs):
+        """ Return the query result.
+        This is the wrapper for the POST query_all of CHP web service.
+
+        Args:
+            queries: a list of JSON TRAPI queries.
+            max_results: the maximum number of results to return. Only applicable for wildcard queries.
+                Default: 10.
+        """
+        _url = self.url + self._query_all_endpoint
+        # First pop off the message and combine them
+        q = {"message": []}
+        for query in queries:
+            q["message"].append(query.pop("message"))
+        verbose = kwargs.pop('verbose', True)
+        q["max_results"] = kwargs.pop('max_results', 10)
+        q["client_id"] = self._client_id
+        from_cache, out = self._post(_url, q, verbose=verbose)
+        if verbose and from_cache:
+            print('Result from cache.')
+        return out
+
     def _query(self, q, **kwargs):
         """ Return the query result.
         This is the wrapper for the POST query of CHP web service.
@@ -64,7 +86,7 @@ class ChpClient:
         _url = self.url + self._query_endpoint
         verbose = kwargs.pop('verbose', True)
         q["max_results"] = kwargs.pop('max_results', 10)
-        q["message"]["reasoner_id"] = self._reasoner_id
+        q["client_id"] = self._client_id
         from_cache, out = self._post(_url, q, verbose=verbose)
         if verbose and from_cache:
             print('Result from cache.')
@@ -109,7 +131,7 @@ class ChpClient:
         """
         _url = self.url + self._curies_endpoint
         # Send reasoner_id in get payload
-        payload = {"reasoner_id": self._reasoner_id}
+        payload = {"client_id": self._client_id}
         from_cache, ret = self._get(_url, params=payload, verbose=verbose)
         if verbose and from_cache:
             print('Result from cache.')
