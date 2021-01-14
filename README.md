@@ -130,7 +130,7 @@ Notice, that the CHP is inherently a multi-hop knowledge provider. We reason in 
 In [6]: from chp_client.query import build_query
 
 In [7]: q = build_query(
-   ...: genes=['ENSEMBL:ENSG00000132155'],
+   ...: genes=['ENSEMBL:ENSG00000141510'],
    ...: therapeutic='CHEMBL:CHEMBL1201585',
    ...: disease='MONDO:0007254',
    ...: outcome=('EFO:0000714', '>=', 500)
@@ -169,7 +169,7 @@ An example response from this type of query graph is below:
       "nodes": {
         "n0": {
           "category": "biolink:Gene",
-          "id": "ENSEMBL:ENSG00000132155"
+          "id": "ENSEMBL:ENSG00000141510"
         },
         "n1": {
           "category": "biolink:Drug",
@@ -189,7 +189,7 @@ An example response from this type of query graph is below:
       "edges": {
         "kge0": {
           "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ENSEMBL:ENSG00000132155",
+          "subject": "ENSEMBL:ENSG00000141510",
           "object": "MONDO:0007254"
         },
         "kge1": {
@@ -205,13 +205,13 @@ An example response from this type of query graph is below:
             "qualifier": ">=",
             "days": 500
           },
-          "has_confidence_level": 0.9658314350797266
+          "has_confidence_level": 0.8499999999999999
         }
       },
       "nodes": {
         "ENSEMBL:ENSG00000132155": {
           "category": "biolink:Gene",
-          "name": "RAF1"
+          "name": "TP53"
         },
         "CHEMBL:CHEMBL1201585": {
           "category": "biolink:Drug",
@@ -247,7 +247,7 @@ An example response from this type of query graph is below:
         "node_bindings": {
           "n0": [
             {
-              "id": "ENSEMBL:ENSG00000132155"
+              "id": "ENSEMBL:ENSG00000141510"
             }
           ],
           "n1": [
@@ -278,7 +278,7 @@ You can extract the probability of the query manually from the TRAPI response da
 
 ```python
 In [9]: client.get_outcome_prob(response)
-Out[9]: 0.9658314350797266
+Out[9]: 0.8499999999999999
 ```
 
 The interpretation of this probability is that all patients in our dataset with a somatic mutation in RAF1 gene that took herceptin survived for more than 500 days after initial diagnosis.
