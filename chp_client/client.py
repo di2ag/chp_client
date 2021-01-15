@@ -150,8 +150,9 @@ class ChpClient:
         """ Extracts the probability from a CHP query response.
         """
         # Extract response. Probability is always in first result
-        kg = q_resp["message"]["knowledge_graph"]
-        res = q_resp["message"]["results"][0]
+        message = q_resp.pop("message", q_resp)
+        kg = message["knowledge_graph"]
+        res = message["results"][0]
         # Find the outcome edge
         for qg_id, edge_bind  in res["edge_bindings"].items():
             edge = kg["edges"][edge_bind[0]["id"]]
