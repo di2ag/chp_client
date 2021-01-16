@@ -62,7 +62,7 @@ def _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard)
     # add genes
     for gene in genes:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category":"biolink:Gene",
+                "category":BIOLINK_GENE,
                 "id": gene
                 }
         node_count += 1
