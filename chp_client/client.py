@@ -4,6 +4,7 @@ Python Client for generic CHP API services.
 
 from collections import defaultdict
 from chp_client._version import __version__
+from chp_client.trapi_constants import *
 
 import requests
 import sys
@@ -159,15 +160,15 @@ class ChpClient:
         """ Extracts the probability from a CHP query response.
         """
         # Extract response. Probability is always in first result
-        message = q_resp.pop("message", q_resp)
+        message = q_resp["message"]
         kg = message["knowledge_graph"]
         res = message["results"][0]
         # Find the outcome edge
         for qg_id, edge_bind  in res["edge_bindings"].items():
             edge = kg["edges"][edge_bind[0]["id"]]
-            if edge["predicate"] == 'biolink:DiseaseToPhenotypicFeatureAssociation':
+            if edge["predicate"] == BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE:
                 try:
-                    prob = edge["has_confidence_level"]
+                    prob = edge["attributes"][0]["value"]
                     break
                 except KeyError:
                     raise KeyError('Could not find associated probability of query. Possible ill-formed query.')
@@ -190,8 +191,8 @@ class ChpClient:
         for _res in res:
             for qg_id, edge_bind in _res["edge_bindings"].items():
                 edge = kg["edges"][edge_bind[0]["id"]]
-                if "biolink:Gene" in wildcard_types and edge["predicate"] == 'biolink:GeneToDiseaseAssociation':
-                    weight = edge["value"]
+                if "biolink:Gene" in wildcard_types and edge["predicate"] == BIOLINK_GENE_TO_DISEASE_PREDICATE:
+                    weight = edge["attributes"][0]["value"]
                     node_curie = edge["subject"]
                     source_node = kg["nodes"][node_curie]
                     name = source_node["name"]
@@ -199,8 +200,8 @@ class ChpClient:
                             "weight": weight,
                             "curie": node_curie,
                             "name": name})
-                elif "biolink:Drug" in wildcard_types and edge["predicate"] == 'biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation':
-                    weight = edge["value"]
+                elif "biolink:Drug" in wildcard_types and edge["predicate"] == BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE:
+                    weight = edge["attributes"]["value"]
                     node_curie = edge["subject"]
                     source_node = kg["nodes"][node_curie]
                     name = source_node["name"]

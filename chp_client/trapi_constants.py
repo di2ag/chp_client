@@ -1,17 +1,17 @@
 import logging
-from chp_client import get_client
+#from chp_client import get_client
 
 # Set up logger
 logger = logging.getLogger(__name__)
 
 # Try to pull most up-to-date constants from endpoint.
-try:
-    client = get_client()
-    constants = client.constants()
-    logger.info('Loaded most recent constants from endpoint')
-except:
-    logger.warning('Could not reach constants endpoint, so loading default entities and predicates. May experience compatiability issues.')
-    constants = {}
+#try:
+#    client = get_client()
+#    constants = client.constants()
+#    logger.info('Loaded most recent constants from endpoint')
+#except:
+#    logger.warning('Could not reach constants endpoint, so loading default entities and predicates. May experience compatiability issues.')
+constants = {}
 
 # Biolink Entities
 BIOLINK_GENE = constants.pop("BIOLINK_GENE", 'biolink:Gene')
