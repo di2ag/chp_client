@@ -10,58 +10,57 @@
 
 import unittest
 import json
+import logging
+
 from chp_client import get_client
 from chp_client.query import build_query
+
+logger = logging.getLogger(__name__)
+
+url = 'http://localhost:8000'
+#url = None
 
 class TestClient(unittest.TestCase):
     """
     """
 
+    def setUp(self):
+        self.client = get_client(url=url)
+
     def test_predicates(self):
         """
         """
-        default_client = get_client()
-        preds = default_client.predicates()
+        preds = self.client.predicates()
         predicates_pretty = json.dumps(preds, indent=2)
         print(predicates_pretty)
 
     def test_curies(self):
         """
         """
-        default_client = get_client()
-        curies = default_client.curies()
-        print(curies.keys())
-        for curie_type in curies.keys():
-            term_length = min([len(curies[curie_type]),5])
-            for curie in curies[curie_type][:term_length]:
-                curie_pretty = json.dumps(curie, indent=2)
-                print(curie_pretty)
+        curies = self.client.curies()
+        for entity_type, curies_dict in curies.items():
+            logger.info('Number of curies for {} = {}'.format(entity_type, len(curies_dict)))
 
     def test_default(self):
         """
         """
-        default_client = get_client()
         q = build_query( genes = ['ENSEMBL:ENSG00000132155'],
                          therapeutic='CHEMBL:CHEMBL88',
                          disease='MONDO:0007254',
                          outcome=('EFO:0000714', '>=', 1000) )
-        r = default_client.query(q)
-        prob = default_client.get_outcome_prob(r)
-        print('Probability of survival',prob)
+        r = self.client.query(q)
+        prob = self.client.get_outcome_prob(r)
+        logger.info('Probability of survival',prob)
 
     def test_wildcard(self):
         """
         """
-        default_client = get_client()
         q = build_query( therapeutic='CHEMBL:CHEMBL88',
                          disease='MONDO:0007254',
                          outcome=('EFO:0000714', '>=', 1000),
                          num_gene_wildcards=1 )
-        r = default_client.query(q)
-        prob = default_client.get_outcome_prob(r)
-        print('Probability of survival',prob)
-        ranked = default_client.get_ranked_wildcards(r)
+        r = self.client.query(q)
+        prob = self.client.get_outcome_prob(r)
+        logger.info('Probability of survival',prob)
+        ranked = self.client.get_ranked_wildcards(r)
         print(json.dumps(ranked, indent=2))
-
-if __name__ == '__main__':
-    unittest.main()

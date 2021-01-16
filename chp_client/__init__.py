@@ -15,7 +15,8 @@ COMMON_ALIASES = {
         "_predicates": 'predicates',
         "_curies": 'curies',
         "_get_outcome_prob": 'get_outcome_prob',
-        "_get_ranked_wildcards": 'get_ranked_wildcards'
+        "_get_ranked_wildcards": 'get_ranked_wildcards',
+        "_constants": 'constants',
         }
 
 # Set reasoner specific aliases
@@ -28,6 +29,7 @@ COMMON_KWARGS = {
         "_predicates_endpoint": '/predicates/',
         "_curies_endpoint": '/curies/',
         "_versions_endpoint": '/versions/',
+        "_constants_endpoint": '/constants/'
         }
 
 # Reasoner specific kwargs

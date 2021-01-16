@@ -3,7 +3,7 @@ Helper module for loading and building CHP queries.
 """
 
 import json
-
+from chp_client.trapi_constants import *
 
 def load_query(filename):
     """ Loads a saved JSON query.
@@ -70,7 +70,7 @@ def _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard)
     # add gene wildcards (if applicable)
     for _ in range(num_gene_wildcards):
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": 'biolink:Gene'
+                "category": BIOLINK_GENE
                 }
         node_count += 1
 
@@ -78,13 +78,13 @@ def _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard)
     # add drugs
     if therapeutic_wildcard:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": 'biolink:Drug',
+            "category": BIOLINK_DRUG,
                 }
         node_count += 1
 
     elif therapeutic is not None:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": 'biolink:Drug',
+                "category": BIOLINK_DRUG,
                 "id": therapeutic
                 }
         node_count += 1
@@ -96,11 +96,11 @@ def _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard)
     if num_gene_wildcards > 0 or len(genes) == 0:
         # This is a gene wildcard query
         for node_id, node in message["query_graph"]["nodes"].items():
-            if node["category"] == 'biolink:Gene':
+            if node["category"] == BIOLINK_GENE:
                 # Get object node
                 obj_node_id = list(set(message["query_graph"]["nodes"]) - {node_id})[0]
                 message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                        "predicate":'biolink:GeneToChemicalAssociation',
+                        "predicate":BIOLINK_GENE_TO_CHEMICAL_PREDICATE,
                         "subject": node_id,
                         "object": obj_node_id
                         }
@@ -109,11 +109,11 @@ def _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard)
     elif therapeutic is None or therapeutic_wildcard:
         # This is a gene wildcard query
         for node_id, node in message["query_graph"]["nodes"].items():
-            if node["category"] == 'biolink:Drug':
+            if node["category"] == BIOLINK_DRUG:
                 # Get object node
                 obj_node_id = list(set(message["query_graph"]["nodes"]) - {node_id})[0]
                 message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                        "predicate":'biolink:ChemicalToGeneAssociation',
+                        "predicate":BIOLINK_CHEMICAL_TO_GENE_PREDICATE,
                         "subject": node_id,
                         "object": obj_node_id
                         }
@@ -175,7 +175,7 @@ def build_query(
     # add genes
     for gene in genes:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category":"biolink:Gene",
+                "category": BIOLINK_GENE,
                 "id": gene
                 }
         node_count += 1
@@ -183,7 +183,7 @@ def build_query(
     # add gene wildcards (if applicable)
     for _ in range(num_gene_wildcards):
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": 'biolink:Gene'
+                "category": BIOLINK_GENE
                 }
         node_count += 1
 
@@ -191,36 +191,36 @@ def build_query(
     # add drugs
     if therapeutic_wildcard:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": 'biolink:Drug',
+            "category": BIOLINK_DRUG,
                 }
         node_count += 1
 
     elif therapeutic is not None:
         message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": 'biolink:Drug',
+                "category": BIOLINK_DRUG,
                 "id": therapeutic
                 }
         node_count += 1
 
     # add in disease node
     message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": 'biolink:Disease',
+            "category": BIOLINK_DISEASE,
             "id": disease
             }
     node_count += 1
 
     # link all evidence to disease
     for node_id, node in message["query_graph"]["nodes"].items():
-        if node["category"] == 'biolink:Gene':
+        if node["category"] == BIOLINK_GENE:
             message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "predicate":'biolink:GeneToDiseaseAssociation',
+                    "predicate":BIOLINK_GENE_TO_DISEASE_PREDICATE,
                     "subject": node_id,
                     "object": 'n{}'.format(node_count - 1)   # should be disease node
                     }
             edge_count += 1
-        elif node["category"] == 'biolink:Drug':
+        elif node["category"] == BIOLINK_DRUG:
             message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "predicate":'biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation',
+                    "predicate":BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE,
                     "subject": node_id,
                     "object": 'n{}'.format(node_count -1)  # should be disease node
                     }
@@ -229,14 +229,14 @@ def build_query(
     # add target outcome node
     outcome_curie, op, value = outcome
     message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": 'biolink:PhenotypicFeature',
+            "category": BIOLINK_PHENOTYPIC_FEATURE,
             "id": outcome_curie,
             }
     node_count += 1
 
     # link disease to target
     message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-            "predicate": 'biolink:DiseaseToPhenotypicFeatureAssociation',
+            "predicate": BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE,
             "subject": 'n{}'.format(node_count-2),
             "object": 'n{}'.format(node_count-1),
             "properties": {

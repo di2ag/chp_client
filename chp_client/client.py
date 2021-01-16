@@ -101,6 +101,15 @@ class ChpClient:
             print('Result from cache.')
         return ret
 
+    def _constants(self, verbose=True, **kwargs):
+        """ Returns a dictionary of TRAPI constants to be used in query building.
+        """
+        _url = self.url + self._constants_endpoint
+        from_cache, ret = self._get(_url, verbose=verbose)
+        if verbose and from_cache:
+            print('Result from cache.')
+        return ret
+
     def _curies(self, verbose=True, **kwargs):
         """ Returns a dictionary of available node curies that are currently supported.
 
