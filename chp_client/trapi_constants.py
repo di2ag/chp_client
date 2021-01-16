@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 # Try to pull most up-to-date constants from endpoint.
 try:
-    client = get_client(url=url)
+    client = get_client()
     constants = client.constants()
     logger.info('Loaded most recent constants from endpoint')
 except:
