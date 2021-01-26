@@ -7,7 +7,6 @@ import copy
 
 from chp_client.client import ChpClient
 from chp_client._version import __version__
-#from chp_client.trapi_constants import *
 
 # Function aliases common to all clients
 COMMON_ALIASES = {
