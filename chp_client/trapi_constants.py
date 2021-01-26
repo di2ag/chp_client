@@ -1,5 +1,7 @@
 import logging
 
+from chp_client import get_client
+
 # Set up logger
 logger = logging.getLogger(__name__)
 
