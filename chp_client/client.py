@@ -9,6 +9,7 @@ from chp_client.trapi_constants import *
 import requests
 import sys
 import warnings
+import copy
 
 try:
     import requests_cache
@@ -160,7 +161,10 @@ class ChpClient:
         """ Extracts the probability from a CHP query response.
         """
         # Extract response. Probability is always in first result
-        message = q_resp["message"]
+        if 'message' in q_resp:
+            message = copy.deepcopy(q_resp['message'])
+        else:
+            message = copy.deepcopy(q_resp)
         kg = message["knowledge_graph"]
         res = message["results"][0]
         # Find the outcome edge
@@ -177,11 +181,15 @@ class ChpClient:
     def _get_ranked_wildcards(self, q_resp):
         """ Extracts ranked list of wildcards from a CHP query response.
         """
-        if len(q_resp["message"]["results"]) < 2:
+        if 'message' in q_resp:
+            message = copy.deepcopy(q_resp['message'])
+        else:
+            message = copy.deepcopy(q_resp)
+        if len(message["results"]) < 2:
             raise ValueError('Could not find any wildcard results. Possible ill-formed query. Consult documentation.')
-        qg = q_resp["message"]["query_graph"]
-        kg = q_resp["message"]["knowledge_graph"]
-        res = q_resp["message"]["results"][1:]
+        qg = message["query_graph"]
+        kg = message["knowledge_graph"]
+        res = message["results"][1:]
         # Extract wildcard types from qg. Numbers are how many wildcard of each type are in qg.
         wildcard_types = defaultdict(int)
         for node_id, node in qg["nodes"].items():
