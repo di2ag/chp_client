@@ -4,15 +4,7 @@ Python Client for generic CHP API services.
 
 from collections import defaultdict
 from chp_client._version import __version__
-try:
-    from chp_client.trapi_constants import (
-            BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE,
-            BIOLINK_GENE_TO_DISEASE_PREDICATE,
-            BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE
-            )
-except ImportError:
-    # Handles circular reference issue.
-    pass
+from chp_client.trapi_constants import *
 
 import requests
 import sys
