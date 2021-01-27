@@ -4,7 +4,6 @@ Python Client for generic CHP API services.
 
 from collections import defaultdict
 from chp_client._version import __version__
-from chp_client.trapi_constants import *
 
 import requests
 import sys
@@ -160,6 +159,13 @@ class ChpClient:
     def _get_outcome_prob(self, q_resp):
         """ Extracts the probability from a CHP query response.
         """
+        # Import statement
+        from chp_client.trapi_constants import (
+                BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE,
+                BIOLINK_GENE_TO_DISEASE_PREDICATE,
+                BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE,
+                )
+        
         # Extract response. Probability is always in first result
         if 'message' in q_resp:
             message = copy.deepcopy(q_resp['message'])
@@ -181,6 +187,12 @@ class ChpClient:
     def _get_ranked_wildcards(self, q_resp):
         """ Extracts ranked list of wildcards from a CHP query response.
         """
+        # Import statement
+        from chp_client.trapi_constants import (
+                BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE,
+                BIOLINK_GENE_TO_DISEASE_PREDICATE,
+                BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE,
+                )
         if 'message' in q_resp:
             message = copy.deepcopy(q_resp['message'])
         else:
