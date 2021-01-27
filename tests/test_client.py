@@ -17,8 +17,8 @@ from chp_client.query import build_query
 
 logger = logging.getLogger(__name__)
 
-url = 'http://localhost:8000'
-#url = None
+#url = 'http://localhost:8000'
+url = None
 
 class TestClient(unittest.TestCase):
     """
