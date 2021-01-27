@@ -17,15 +17,15 @@ from chp_client.query import build_query
 
 logger = logging.getLogger(__name__)
 
-url = 'http://localhost:8000'
-#url = None
+#url = 'http://localhost:8000'
+url = None
 
 class TestClient(unittest.TestCase):
     """
     """
 
     def setUp(self):
-        self.client = get_client() #url=url)
+        self.client = get_client(url=url)
 
     def test_predicates(self):
         """
