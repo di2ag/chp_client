@@ -25,7 +25,7 @@ class TestClient(unittest.TestCase):
     """
 
     def setUp(self):
-        self.client = get_client() #url=url)
+        self.client = get_client(url=url)
 
     def test_predicates(self):
         """
