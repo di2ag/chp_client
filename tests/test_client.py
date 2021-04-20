@@ -11,14 +11,257 @@
 import unittest
 import json
 import logging
+import sys
 
 from chp_client import get_client
-from chp_client.query import build_query
+from chp_client.query import build_standard_query, build_wildcard_query, build_onehop_query
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.DEBUG)
+stream_handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(stream_handler)
 #url = 'http://localhost:8000'
 url = None
+
+class TestQuery(unittest.TestCase):
+    def test_build_standard_query(self):
+        logger.info('Running TRAPI 1.0 Test.')
+        q_1_0 = build_standard_query(
+                genes=['ENSEMBL:ENSG00000132155'],
+                drugs=['CHEMBL:CHEMBL88'],
+                disease='MONDO:0007254',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.0',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+        
+        logger.info('Running TRAPI 1.1 test.')
+        q_1_1 = build_standard_query(
+                genes=['ENSEMBL:ENSG00000132155'],
+                drugs=['CHEMBL:CHEMBL88'],
+                disease='MONDO:0007254',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.1',
+                )
+        b, message = q_1_1.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+    
+    def test_build_wildcard_query(self):
+        logger.info('Running TRAPI 1.0 Test with gene wildcard.')
+        q_1_0 = build_wildcard_query(
+                'biolink:Gene',
+                genes=['ENSEMBL:ENSG00000132155'],
+                drugs=['CHEMBL:CHEMBL88'],
+                disease='MONDO:0007254',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.0',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+        
+        logger.info('Running TRAPI 1.1 test with gene wildcard.')
+        q_1_1 = build_wildcard_query(
+                'biolink:Gene',
+                genes=['ENSEMBL:ENSG00000132155'],
+                drugs=['CHEMBL:CHEMBL88'],
+                disease='MONDO:0007254',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.1',
+                )
+        b, message = q_1_1.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+
+        logger.info('Running TRAPI 1.0 Test with drug wildcard.')
+        q_1_0 = build_wildcard_query(
+                'biolink:Drug',
+                genes=['ENSEMBL:ENSG00000132155'],
+                drugs=['CHEMBL:CHEMBL88'],
+                disease='MONDO:0007254',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.0',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+        
+        logger.info('Running TRAPI 1.1 test with drug wildcard.')
+        q_1_1 = build_wildcard_query(
+                'biolink:Drug',
+                genes=['ENSEMBL:ENSG00000132155'],
+                drugs=['CHEMBL:CHEMBL88'],
+                disease='MONDO:0007254',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.1',
+                )
+        b, message = q_1_1.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+
+    def test_build_onehop_standard_query(self):
+        logger.info('Running TRAPI 1.0 Test with gene to drug.')
+        q_1_0 = build_onehop_query(
+                q_subject='ENSEMBL:ENSG00000132155',
+                q_subject_category = 'biolink:Gene',
+                q_object='CHEMBL:CHEMBL88',
+                q_object_category='biolink:Drug',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.0',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+        
+        logger.info('Running TRAPI 1.1 Test with gene to drug.')
+        q_1_0 = build_onehop_query(
+                q_subject='ENSEMBL:ENSG00000132155',
+                q_subject_category = 'biolink:Gene',
+                q_object='CHEMBL:CHEMBL88',
+                q_object_category='biolink:Drug',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.1',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+
+        logger.info('Running TRAPI 1.0 Test with drug to gene.')
+        q_1_0 = build_onehop_query(
+                q_object='ENSEMBL:ENSG00000132155',
+                q_object_category = 'biolink:Gene',
+                q_subject='CHEMBL:CHEMBL88',
+                q_subject_category='biolink:Drug',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.0',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+        
+        logger.info('Running TRAPI 1.1 Test with drug to gene.')
+        q_1_0 = build_onehop_query(
+                q_object='ENSEMBL:ENSG00000132155',
+                q_object_category = 'biolink:Gene',
+                q_subject='CHEMBL:CHEMBL88',
+                q_subject_category='biolink:Drug',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.1',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+
+        logger.info('Running TRAPI 1.0 Test with drug to disease.')
+        q_1_0 = build_onehop_query(
+                q_object='MONDO:0007254',
+                q_object_category = 'biolink:Disease',
+                q_subject='CHEMBL:CHEMBL88',
+                q_subject_category='biolink:Drug',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.0',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+        
+        logger.info('Running TRAPI 1.1 Test with drug to disease.')
+        q_1_0 = build_onehop_query(
+                q_object='MONDO:0007254',
+                q_object_category = 'biolink:Disease',
+                q_subject='CHEMBL:CHEMBL88',
+                q_subject_category='biolink:Drug',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.1',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+
+        logger.info('Running TRAPI 1.0 Test with gene to disease.')
+        q_1_0 = build_onehop_query(
+                q_object='MONDO:0007254',
+                q_object_category = 'biolink:Disease',
+                q_subject='ENSEMBL:ENSG00000132155',
+                q_subject_category = 'biolink:Gene',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.0',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
+
+        logger.info('Running TRAPI 1.1 Test with gene to disease.')
+        q_1_0 = build_onehop_query(
+                q_object='MONDO:0007254',
+                q_object_category = 'biolink:Disease',
+                q_subject='ENSEMBL:ENSG00000132155',
+                q_subject_category = 'biolink:Gene',
+                outcome='EFO:0000714',
+                outcome_name='survival_time',
+                outcome_op='>',
+                outcome_value=600,
+                trapi_version='1.1',
+                )
+        b, message = q_1_0.validate()
+        if b is False:
+            print(message)
+        self.assertTrue(b)
 
 class TestClient(unittest.TestCase):
     """

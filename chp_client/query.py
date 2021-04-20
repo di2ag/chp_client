@@ -3,245 +3,490 @@ Helper module for loading and building CHP queries.
 """
 
 import json
-from chp_client.trapi_constants import *
+from jsonschema import ValidationError
 
-def load_query(filename):
-    """ Loads a saved JSON query.
-    """
-    with open(filename, 'r') as f_:
-        q = json.load(f_)
+from chp_client.trapi_constants import *
+from chp_client.exceptions import *
+from reasoner_validator import validate_QEdge_1_0, validate_QEdge_1_1, \
+validate_QNode_1_0, validate_QNode_1_1, validate_Message_1_0, validate_Message_1_1, \
+validate_QueryGraph_1_0, validate_QueryGraph_1_1
+
+
+# Constants
+SUBJECT_TO_OBJECT_PREDICATE_MAP = {
+        (BIOLINK_GENE, BIOLINK_DRUG): BIOLINK_GENE_TO_CHEMICAL_PREDICATE,
+        (BIOLINK_DRUG, BIOLINK_GENE): BIOLINK_CHEMICAL_TO_GENE_PREDICATE,
+        (BIOLINK_GENE, BIOLINK_DISEASE): BIOLINK_GENE_TO_DISEASE_PREDICATE,
+        (BIOLINK_DRUG, BIOLINK_DISEASE): BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE,
+        }
+
+class QBaseClass:
+    def __init__(self, trapi_version):
+        self.trapi_version = trapi_version
+    
+    def json(self, filename=None):
+        if filename is None:
+            return json.dumps(self.to_dict())
+        else:
+            with open(filename, 'w') as json_file:
+                json.dump(self.to_dict(), json_file)
+
+    def __str__(self):
+        return json.dumps(self.to_dict())
+
+class QConstraintOrAdditionalProperty(QBaseClass):
+    def __init__(self,
+            trapi_version,
+            name,
+            c_id,
+            operator,
+            value,
+            unit_id=None,
+            unit_name=None,
+            c_not=False,
+            ):
+        self.name = name
+        self.id = c_id
+        self.operator = operator
+        self.value = value
+        self.unit_id = unit_id
+        self.unit_name = unit_name
+        super().__init__(trapi_version)
+
+    def to_dict(self):
+        if self.trapi_version == '1.0':
+            return {
+                    self.name: {
+                        "id": self.id,
+                        "operator": self.operator,
+                        "value": self.value,
+                        "unit_id": self.unit_id,
+                        "unit_name": self.unit_name
+                        }
+                    }
+        elif self.trapi_version == '1.1':
+            return {
+                        "name": self.name,
+                        "id": self.id,
+                        "operator": self.operator,
+                        "value": self.value,
+                        "unit_id": self.unit_id,
+                        "unit_name": self.unit_name
+                    }
+        else:
+            raise UnsupportedTrapiVersion(self.trapi_version)
+
+
+class QNode(QBaseClass):
+    def __init__(self,
+            trapi_version,
+            ids = None,
+            categories = None,
+            constraints = None,
+            ):
+        self.ids = ids
+        self.categories = categories
+        self.constraints = constraints
+        super().__init__(trapi_version)
+
+        valid, message = self.validate()
+        if not valid:
+            raise InvalidTrapiComponent(trapi_version, 'QNode', message)
+
+    def to_dict(self):
+        if self.trapi_version == '1.0':
+            _dict = {
+                        "id": self.ids,
+                        "category": self.categories,
+                    }
+            if self.constraints is not None:
+                for constraint in self.constraints:
+                    _dict.update(constraint.to_dict())
+            return _dict
+        elif self.trapi_version == '1.1':
+            ids = self.ids
+            categories = self.categories
+            if type(ids) is not list and ids is not None:
+                ids = [ids]
+            if type(categories) is not list and categories is not None:
+                    categories = [categories]
+            _dict = {
+                        "ids": ids,
+                        "categories": categories,
+                        "constraints": []
+                    }
+            if self.constraints is not None:
+                for constraint in self.constraints:
+                    _dict["constraints"].append(constraint.to_dict())
+            return _dict
+        else:
+            raise UnsupportedTrapiVersion(self.trapi_version)
+
+    def add_constraint(self, 
+            name,
+            c_id,
+            operator,
+            value,
+            unit_id=None,
+            unit_name=None,
+            c_not=False,
+            edge_id=None,
+            node_id=None,
+            ):
+        if self.constraints is None:
+            self.constraints = []
+        self.constraints.append(
+                QConstraintOrAdditionalProperty(
+                    trapi_version=self.trapi_version,
+                    name=name,
+                    c_id=c_id,
+                    operator=operator,
+                    value=value,
+                    unit_id=unit_id,
+                    unit_name=unit_name,
+                    c_not=c_not,
+                    )
+                )
+        valid, message = self.validate()
+        if not valid:
+            raise InvalidTrapiComponent(trapi_version, 'QNode', message)
+
+    def validate(self):
+        _dict = self.to_dict()
+        try:
+            if self.trapi_version == '1.0':
+                validate_QNode_1_0(_dict)
+            elif self.trapi_version == '1.1':
+                validate_QNode_1_1(_dict)
+            else:
+                raise UnsupportedTrapiVersion(self.trapi_version)
+            return True, None 
+        except ValidationError as ex:
+                return False, ex.message
+
+class QEdge(QBaseClass):
+    def __init__(self,
+            trapi_version,
+            q_subject,
+            q_object,
+            predicates=None,
+            relation=None,
+            constraints=None,
+            ):
+        self.subject = q_subject
+        self.object = q_object
+        self.predicates = predicates
+        self.relation = relation
+        self.constraints = constraints
+        super().__init__(trapi_version)
+        
+        valid, message = self.validate()
+        if not valid:
+            raise InvalidTrapiComponent(trapi_version, 'QEdge', message)
+
+    def to_dict(self):
+        if self.trapi_version == '1.0':
+            _dict = {
+                    "predicate": self.predicates,
+                    "relation": self.relation,
+                    "subject": self.subject,
+                    "object": self.object,
+                    }
+            if self.constraints is not None:
+                for constraint in self.constraints:
+                    _dict.update(constraint.to_dict())
+            return _dict
+        elif self.trapi_version == '1.1':
+            predicates = self.predicates
+            if type(predicates) is not list:
+                predicates = [predicates]
+            _dict = {
+                    "predicates": predicates,
+                    "relation": self.relation,
+                    "subject": self.subject,
+                    "object": self.object,
+                    }
+            if self.constraints is not None:
+                _dict["constraints"] = []
+                for constraint in self.constraints:
+                    _dict["constraints"].append(constraint.to_dict())
+            return _dict
+    
+    def add_constraint(self, 
+            name,
+            c_id,
+            operator,
+            value,
+            unit_id=None,
+            unit_name=None,
+            c_not=False,
+            edge_id=None,
+            node_id=None,
+            ):
+        if self.constraints is None:
+            self.constraints = []
+        self.constraints.append(
+                QConstraintOrAdditionalProperty(
+                    trapi_version=self.trapi_version,
+                    name=name,
+                    c_id=c_id,
+                    operator=operator,
+                    value=value,
+                    unit_id=unit_id,
+                    unit_name=unit_name,
+                    c_not=c_not,
+                    )
+                )
+        valid, message = self.validate()
+        if not valid:
+            raise InvalidTrapiComponent(trapi_version, 'QEdge', message)
+        
+    def validate(self):
+        _dict = self.to_dict()
+        try:
+            if self.trapi_version == '1.0':
+                validate_QEdge_1_0(_dict)
+            elif self.trapi_version == '1.1':
+                validate_QEdge_1_1(_dict)
+            else:
+                raise UnsuppoertedTrapiVersion(self.trapi_version)
+            return True, None 
+        except ValidationError as ex:
+                return False, ex.message
+
+class Query(QBaseClass):
+    def __init__(self, trapi_version='1.1'):
+        self.nodes = {}
+        self.edges = {}
+        self.node_counter = 0
+        self.edge_counter = 0
+        super().__init__(trapi_version)
+
+    def add_node(self, ids, categories):
+        node_id = 'n{}'.format(self.node_counter)
+        self.node_counter += 1
+        self.nodes[node_id] = QNode(
+                trapi_version=self.trapi_version,
+                ids=ids,
+                categories=categories
+                )
+        return node_id
+
+    def add_edge(self, q_subject, q_object, predicates, relation=None):
+        edge_id = 'e{}'.format(self.edge_counter)
+        self.edge_counter += 1
+        self.edges[edge_id] = QEdge(
+                trapi_version=self.trapi_version,
+                q_subject=q_subject,
+                q_object=q_object,
+                predicates=predicates,
+                relation=relation,
+                )
+        return edge_id
+
+    def add_constraint(self,
+            name,
+            c_id,
+            operator,
+            value,
+            unit_id=None,
+            unit_name=None,
+            c_not=False,
+            edge_id=None,
+            node_id=None,
+            ):
+        if edge_id is None and node_id is None:
+            raise ValueError('Must specify either node or edge id.')
+        elif edge_id is not None and node_id is not None:
+            raise ValueError('Must specify either node or edge id, not both.')
+        if edge_id is not None:
+            q_obj = self.edges[edge_id]
+        else:
+            q_obj = self.nodes[node_id]
+        q_obj.add_constraint(
+                name,
+                c_id,
+                operator,
+                value,
+                unit_id=None,
+                unit_name=None,
+                c_not=False,
+                )
+        return True
+
+    def to_dict(self):
+        nodes = {}
+        edges = {}
+        for node_id, node in self.nodes.items():
+            nodes[node_id] = node.to_dict()
+        for edge_id, edge in self.edges.items():
+            edges[edge_id] = edge.to_dict()
+        return {
+                "nodes": nodes,
+                "edges": edges,
+                }
+
+    def find_nodes(self, categories=None, ids=None):
+        matched_node_ids = []
+        for node_id, node_info in self.nodes.items():
+            if categories is not None:
+                if node_info.categories != categories:
+                    continue
+            if ids is not None:
+                if node_info.ids != ids:
+                    continue
+            matched_node_ids.append(node_id)
+        return matched_node_ids
+
+    def make_trapi_message(self, to_json=False):
+        trapi_message = {
+                "query_graph": self.to_dict(),
+                "knowledge_graph": None,
+                "results": None
+                }
+        if to_json:
+            return json.dumps(trapi_message)
+        return trapi_message
+
+    def validate_query_graph(self):
+        _dict = self.to_dict()
+        try:
+            if self.trapi_version == '1.0':
+                validate_QueryGraph_1_0(_dict)
+            elif self.trapi_version == '1.1':
+                validate_QueryGraph_1_1(_dict)
+            else:
+                raise UnsuppoertedTrapiVersion(self.trapi_version)
+            return True, None 
+        except ValidationError as ex:
+            return False, ex.message
+
+    def validate(self):
+        _dict = self.make_trapi_message()
+        try:
+            if self.trapi_version == '1.0':
+                validate_Message_1_0(_dict)
+            elif self.trapi_version == '1.1':
+                validate_Message_1_1(_dict)
+            else:
+                raise UnsuppoertedTrapiVersion(self.trapi_version)
+            return True, None 
+        except ValidationError as ex:
+            return False, ex.message
+
+def build_standard_query(
+        genes=None,
+        drugs=None,
+        outcome=None,
+        outcome_name=None,
+        outcome_op=None,
+        outcome_value=None,
+        disease=None,
+        trapi_version='1.1',
+        ):
+    # Initialize Query
+    q = Query(trapi_version=trapi_version)
+    
+    # Add disease node
+    disease_node = q.add_node(disease, BIOLINK_DISEASE)
+
+    # Add gene nodes
+    gene_nodes = []
+    for gene in genes:
+        gene_nodes.append(q.add_node(gene, BIOLINK_GENE))
+
+    # Add drug nodes
+    drug_nodes = []
+    for drug in drugs:
+        drug_nodes.append(q.add_node(drug, BIOLINK_DRUG))
+
+    # Connect all gene nodes to disease.
+    for gene_node in gene_nodes:
+        q.add_edge(gene_node, disease_node, BIOLINK_GENE_TO_DISEASE_PREDICATE)
+
+    # Connect all drug nodes to disease.
+    for drug_node in drug_nodes:
+        q.add_edge(drug_node, disease_node, BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE)
+
+    # Connect drug node to outcome node
+    outcome_node = q.add_node(outcome, BIOLINK_PHENOTYPIC_FEATURE)
+    q.add_constraint(outcome_name, outcome, outcome_op, outcome_value, node_id=outcome_node)
+    q.add_edge(disease_node, outcome_node, BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE)
+
     return q
 
-def save_query(q, filename):
-    """ Saves a json query.
-    """
-    with open(filename, 'w') as f_:
-        json.dump(q, f_)
-    return filename
 
-def _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard):
-    if genes is None:
-        genes = []
-    # Error Handling
-    if len(genes) > 0:
-        if num_gene_wildcards > 0:
-            raise ValueError('Can not specify both a gene and a gene wildcard at the same time.')
-        if not therapeutic_wildcard:
-            raise ValueError('If you specify a gene than you must specify a therapeutic wildcard.')
-        if therapeutic is not None:
-            raise ValueError('If you specify a gene than you must specify a therapeutic wildcard.')
-    else:
-        if num_gene_wildcards == 0:
-            raise ValueError('You need to specify either a gene or a gene wildcard.')
-        if therapeutic_wildcard:
-            raise ValueError('If you specify a gene wildcard than you CAN NOT use therapeutic wildcard.')
-        if therapeutic is None:
-            raise ValueError('If you specify a gene wildcard than you CAN NOT use therapeutic wildcard.')
-    # Build the query
-    # empty response
-    message = {
-            "query_graph": {},
-            "knowledge_graph": {},
-            "results": []
-            }
-    # empty query graph
-    message["query_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
-
-    # empty knowledge graph
-    message["knowledge_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
-
-    node_count = 0
-    edge_count = 0
-
-    # add genes
-    for gene in genes:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category":BIOLINK_GENE,
-                "id": gene
-                }
-        node_count += 1
-
-    # add gene wildcards (if applicable)
-    for _ in range(num_gene_wildcards):
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_GENE
-                }
-        node_count += 1
-
-
-    # add drugs
-    if therapeutic_wildcard:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_DRUG,
-                }
-        node_count += 1
-
-    elif therapeutic is not None:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_DRUG,
-                "id": therapeutic
-                }
-        node_count += 1
-
-    if node_count != 2:
-        raise ValueError('Malformed one hop query: Number of nodes are not 2. Check your inputs.')
-
-    # Link two nodes together
-    if num_gene_wildcards > 0 or len(genes) == 0:
-        # This is a gene wildcard query
-        for node_id, node in message["query_graph"]["nodes"].items():
-            if node["category"] == BIOLINK_GENE:
-                # Get object node
-                obj_node_id = list(set(message["query_graph"]["nodes"]) - {node_id})[0]
-                message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                        "predicate":BIOLINK_GENE_TO_CHEMICAL_PREDICATE,
-                        "subject": node_id,
-                        "object": obj_node_id
-                        }
-                edge_count += 1
-
-    elif therapeutic is None or therapeutic_wildcard:
-        # This is a gene wildcard query
-        for node_id, node in message["query_graph"]["nodes"].items():
-            if node["category"] == BIOLINK_DRUG:
-                # Get object node
-                obj_node_id = list(set(message["query_graph"]["nodes"]) - {node_id})[0]
-                message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                        "predicate":BIOLINK_CHEMICAL_TO_GENE_PREDICATE,
-                        "subject": node_id,
-                        "object": obj_node_id
-                        }
-                edge_count += 1
-
-    if edge_count != 1:
-        raise ValueError('Malformed query: Edge count was not equal to 1. Check your inputs.')
-
-    return {"message": message}
-
-def build_query(
+def build_wildcard_query(
+        wildcard_category,
         genes=None,
-        therapeutic=None,
+        drugs=None,
         outcome=None,
+        outcome_name=None,
+        outcome_op=None,
+        outcome_value=None,
         disease=None,
-        num_gene_wildcards=0,
-        therapeutic_wildcard=False,
-        one_hop=False
+        trapi_version='1.1',
         ):
-    """ Helper function to build CHP JSON queries.
+    
+    # Build standard query
+    q = build_standard_query(genes, drugs, outcome, outcome_name, outcome_op, outcome_value, disease, trapi_version=trapi_version)
+    disease_node = q.find_nodes(categories=BIOLINK_DISEASE)[0]
 
-    Args:
-        genes: A list of ENSEMBL gene curies (max 10).
-        therapeutic: A string CHEMBL curie for a drug/therputic.
-        outcome: A patient outcome tuple of the form ({outcome curie}, {numerical inequality}, {float}).
-        disease: A MONDO disease curie string.
-        num_gene_wildcards: Number of gene wildcards that will be filled by CHP. Default: 0.
-        therapeutic_wildcard: Boolean letting CHP know if it should try to find a statistically important therapeutic. Default: False.
-        one_hop: A boolean that lets you build a one hop query (i.e. 2 nodes one edge) between either a gene/drug wildcard and a gene/drug
-            non wildcard. Uses a default surival time of >= 970 and disease is assumed to be breast cancer.
-    """
-    if one_hop:
-        return _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard)
-    # Initialize
-    if genes is None:
-        genes = []
+    wildcard_node = q.add_node(None, wildcard_category)
+    # Add wildcard to query
+    if wildcard_category == BIOLINK_GENE:
+        q.add_edge(wildcard_node, disease_node, BIOLINK_GENE_TO_DISEASE_PREDICATE)
+    elif wildcard_category == BIOLINK_DRUG:
+        q.add_edge(wildcard_node, disease_node, BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE)
+    else:
+        raise InvalidWildcardCategory(wildcard_category)
+    return q
 
-    # empty response
-    message = {
-            "query_graph": {},
-            "knowledge_graph": {},
-            "results": []
-            }
-    # empty query graph
-    message["query_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
+def build_onehop_query(
+        q_subject,
+        q_subject_category,
+        q_object,
+        q_object_category,
+        genes=None,
+        drugs=None,
+        outcome=None,
+        outcome_name=None,
+        outcome_op=None,
+        outcome_value=None,
+        disease=None,
+        trapi_version='1.1',
+        ):
+    # Initialize query
+    q = Query(trapi_version)
 
-    # empty knowledge graph
-    message["knowledge_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
+    # Add nodes
+    subject_node = q.add_node(q_subject, q_subject_category)
+    object_node = q.add_node(q_object, q_object_category)
 
-    node_count = 0
-    edge_count = 0
+    # Add edge
+    edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[(q_subject_category, q_object_category)]
+    edge_id = q.add_edge(subject_node, object_node, edge_predicate)
 
-    # add genes
-    for gene in genes:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_GENE,
-                "id": gene
-                }
-        node_count += 1
+    # Add constraints
+    q.add_constraint('predicate_proxy', 'CHP:PredicateProxy', '==', outcome_name, edge_id=edge_id)
+    q.add_constraint(outcome_name, outcome, outcome_op, outcome_value, edge_id=edge_id)
+    
+    # Get context
+    context = []
+    if genes is not None:
+        context.append(BIOLINK_GENE)
+    if drugs is not None:
+        context.append(BIOLINK_DRUG)
+    if disease is not None:
+        context.append(BIOLINK_DISEASE)
 
-    # add gene wildcards (if applicable)
-    for _ in range(num_gene_wildcards):
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_GENE
-                }
-        node_count += 1
+    # Process context
+    q.add_constraint('predicate_context', 'CHP:PredicateContext', '==', context, edge_id=edge_id)
+    if genes is not None:
+        q.add_constraint(BIOLINK_GENE, BIOLINK_GENE, 'matches', genes, edge_id=edge_id)
+    if drugs is not None:
+        q.add_constraint(BIOLINK_DRUG, BIOLINK_DRUG, 'matches', drugs, edge_id=edge_id)
+    if disease is not None:
+        q.add_constraint(BIOLINK_DISEASE, BIOLINK_DISEASE, 'matches', disease, edge_id=edge_id)
 
-
-    # add drugs
-    if therapeutic_wildcard:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_DRUG,
-                }
-        node_count += 1
-
-    elif therapeutic is not None:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_DRUG,
-                "id": therapeutic
-                }
-        node_count += 1
-
-    # add in disease node
-    message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_DISEASE,
-            "id": disease
-            }
-    node_count += 1
-
-    # link all evidence to disease
-    for node_id, node in message["query_graph"]["nodes"].items():
-        if node["category"] == BIOLINK_GENE:
-            message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "predicate":BIOLINK_GENE_TO_DISEASE_PREDICATE,
-                    "subject": node_id,
-                    "object": 'n{}'.format(node_count - 1)   # should be disease node
-                    }
-            edge_count += 1
-        elif node["category"] == BIOLINK_DRUG:
-            message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "predicate":BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE,
-                    "subject": node_id,
-                    "object": 'n{}'.format(node_count -1)  # should be disease node
-                    }
-            edge_count += 1
-
-    # add target outcome node
-    outcome_curie, op, value = outcome
-    message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_PHENOTYPIC_FEATURE,
-            "id": outcome_curie,
-            }
-    node_count += 1
-
-    # link disease to target
-    message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-            "predicate": BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE,
-            "subject": 'n{}'.format(node_count-2),
-            "object": 'n{}'.format(node_count-1),
-            "properties": {
-                           "qualifier": op,
-                           "days": value
-                          }
-            }
-    return {"message": message}
+    return q
