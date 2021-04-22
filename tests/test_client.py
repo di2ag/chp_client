@@ -12,16 +12,128 @@ import unittest
 import json
 import logging
 import sys
+import os
+from collections import defaultdict
+from generate_regression_tests import QueryBuildingRegressionSuite
+from chp_client.exceptions import QueryBuildError
 
 from chp_client import get_client
 from chp_client.query import build_standard_query, build_wildcard_query, build_onehop_query
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 stream_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(stream_handler)
 #url = 'http://localhost:8000'
 url = None
+
+class TestQuery2(unittest.TestCase):
+    def setUp(self):
+        self.tester = QueryBuildingRegressionSuite()
+        self.standard_query_log_path = os.path.join(os.getcwd(), 'standard_query.log')
+        self.wildcard_query_log_path = os.path.join(os.getcwd(), 'wildcard_query.log')
+        self.onehop_query_log_path = os.path.join(os.getcwd(), 'onehop_query.log')
+
+    def test_build_standard_query(self):
+        tests = self.tester.make_standard_query_tests()
+        res = defaultdict(list)
+        for i, test in enumerate(tests):
+            try:
+                q = build_standard_query(**test)
+                t, message = q.validate()
+                if not t:
+                    res['TRAPI Error'].append((i, test, message))
+                res['Pass'].append((i, test, None))
+                self.assertTrue(t)
+            except QueryBuildError as ex:
+                logger.info('Test {} encountered an error: {}'.format(i, ex.message))
+                res['Build Error'].append((i, test, ex.message))
+        if len(res['Build Error']) > 0:
+            logger.warning('{} Standard tests failed with a Query Build Error.'.format(
+                len(res['Build Error'])))
+        if len(res['TRAPI Error']) > 0:
+            logger.warning('{} Standard tests failed with a Trapi Error.'.format(
+                len(res['TRAPI Error'])))
+        # Save log
+        self.save_log('standard', res)
+    
+    
+    def test_build_wildcard_query(self):
+        tests = self.tester.make_wildcard_query_tests()
+        res = defaultdict(list)
+        for i, test in enumerate(tests):
+            try:
+                q = build_wildcard_query(**test)
+                t, message = q.validate()
+                if not t:
+                    res['TRAPI Error'].append((i, test, message))
+                res['Pass'].append((i, test, None))
+                self.assertTrue(t)
+            except QueryBuildError as ex:
+                logger.info('Test {} encountered an error: {}'.format(i, ex.message))
+                res['Build Error'].append((i, test, ex.message))
+        if len(res['Build Error']) > 0:
+            logger.warning('{} Standard tests failed with a Query Build Error.'.format(
+                len(res['Build Error'])))
+        if len(res['TRAPI Error']) > 0:
+            logger.warning('{} Standard tests failed with a Trapi Error.'.format(
+                len(res['TRAPI Error'])))
+        # Save log
+        self.save_log('wildcard', res)
+        
+    def test_build_onehop_query(self):
+        tests = self.tester.make_onehop_query_tests()
+        res = defaultdict(list)
+        for i, test in enumerate(tests):
+            try:
+                q = build_onehop_query(**test)
+                t, message = q.validate()
+                if not t:
+                    res['TRAPI Error'].append((i, test, message))
+                res['Pass'].append((i, test, None))
+                self.assertTrue(t)
+            except QueryBuildError as ex:
+                logger.info('Test {} encountered an error: {}'.format(i, ex.message))
+                res['Build Error'].append((i, test, ex.message))
+        if len(res['Build Error']) > 0:
+            logger.warning('{} Standard tests failed with a Query Build Error.'.format(
+                len(res['Build Error'])))
+        if len(res['TRAPI Error']) > 0:
+            logger.warning('{} Standard tests failed with a Trapi Error.'.format(
+                len(res['TRAPI Error'])))
+        # Save log
+        self.save_log('onehop', res)
+    
+    def save_log(self, query_type, res):
+        if query_type == 'standard':
+            log_path = self.standard_query_log_path
+        elif query_type == 'wildcard':
+            log_path = self.wildcard_query_log_path
+        elif query_type == 'onehop':
+            log_path = self.onehop_query_log_path
+        else:
+            raise ValueError('Unknown query type: {query_type}')
+
+        # Write out log
+        with open(log_path, 'w') as log_file:
+            log_file.write('# Summary:\n')
+            log_file.write('\t{} Standard tests passed.\n'.format(len(res['Pass'])))
+            log_file.write('\t{} Standard tests failed with Trapi Error.\n'.format(len(res['TRAPI Error'])))
+            log_file.write('\t{} Standard tests passed with Query Build Error.\n'.format(len(res['Build Error'])))
+            log_file.write('-'*100)
+            log_file.write('\n# Details:\n')
+            if len(res['TRAPI Error']) > 0:
+                log_file.write('## TRAPI Error Tests:\n')
+                for _res in res['TRAPI Error']:
+                    log_file.write(' '.join(str(s) for s in _res) + '\n')
+            if len(res['Build Error']) > 0:
+                log_file.write('## Query Build Error Tests:\n')
+                for _res in res['Build Error']:
+                    log_file.write(' '.join(str(s) for s in _res) + '\n')
+            if len(res['Pass']) > 0:
+                log_file.write('## Successful Tests:\n')
+                for _res in res['Pass']:
+                    log_file.write(' '.join(str(s) for s in _res) + '\n')
 
 class TestQuery(unittest.TestCase):
     def test_build_standard_query(self):

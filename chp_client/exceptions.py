@@ -35,3 +35,12 @@ class InvalidTrapiComponent(Exception):
                 self.trapi_version,
                 self.validation_error_msg
                 )
+
+class QueryBuildError(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return self.message
+

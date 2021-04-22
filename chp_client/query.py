@@ -239,7 +239,7 @@ class QEdge(QBaseClass):
                 )
         valid, message = self.validate()
         if not valid:
-            raise InvalidTrapiComponent(trapi_version, 'QEdge', message)
+            raise InvalidTrapiComponent(self.trapi_version, 'QEdge', message)
         
     def validate(self):
         _dict = self.to_dict()
@@ -384,29 +384,45 @@ def build_standard_query(
         disease=None,
         trapi_version='1.1',
         ):
+
+    if genes is None and drugs is None:
+        raise QueryBuildError("Both genes and drugs can't be None.")
+    if outcome is None:
+        raise QueryBuildError('You must specify an outcome CURIE.')
+    if outcome_op is None:
+        raise QueryBuildError("You must specify an outcome operation consistent with \
+                with your desired TRAPI version's Constraint Object.")
+    if outcome_value is None:
+        raise QueryBuildError('You must specify an outcome value to test.')
+    if disease is None:
+        raise QueryBuildError('You must specify a disease.')
+
     # Initialize Query
     q = Query(trapi_version=trapi_version)
     
     # Add disease node
     disease_node = q.add_node(disease, BIOLINK_DISEASE)
 
-    # Add gene nodes
-    gene_nodes = []
-    for gene in genes:
-        gene_nodes.append(q.add_node(gene, BIOLINK_GENE))
+    if genes is not None:
+        # Add gene nodes
+        gene_nodes = []
+        for gene in genes:
+            gene_nodes.append(q.add_node(gene, BIOLINK_GENE))
+    
+        # Connect all gene nodes to disease.
+        for gene_node in gene_nodes:
+            q.add_edge(gene_node, disease_node, BIOLINK_GENE_TO_DISEASE_PREDICATE)
 
-    # Add drug nodes
-    drug_nodes = []
-    for drug in drugs:
-        drug_nodes.append(q.add_node(drug, BIOLINK_DRUG))
+    if drugs is not None:
+        # Add drug nodes
+        if drugs is not None:
+            drug_nodes = []
+            for drug in drugs:
+                drug_nodes.append(q.add_node(drug, BIOLINK_DRUG))
 
-    # Connect all gene nodes to disease.
-    for gene_node in gene_nodes:
-        q.add_edge(gene_node, disease_node, BIOLINK_GENE_TO_DISEASE_PREDICATE)
-
-    # Connect all drug nodes to disease.
-    for drug_node in drug_nodes:
-        q.add_edge(drug_node, disease_node, BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE)
+        # Connect all drug nodes to disease.
+        for drug_node in drug_nodes:
+            q.add_edge(drug_node, disease_node, BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE)
 
     # Connect drug node to outcome node
     outcome_node = q.add_node(outcome, BIOLINK_PHENOTYPIC_FEATURE)
@@ -417,7 +433,7 @@ def build_standard_query(
 
 
 def build_wildcard_query(
-        wildcard_category,
+        wildcard_category=None,
         genes=None,
         drugs=None,
         outcome=None,
@@ -427,6 +443,10 @@ def build_wildcard_query(
         disease=None,
         trapi_version='1.1',
         ):
+
+    if wildcard_category is None:
+        QueryBuildError('Wildcard category can not be None.')
+
     
     # Build standard query
     q = build_standard_query(genes, drugs, outcome, outcome_name, outcome_op, outcome_value, disease, trapi_version=trapi_version)
@@ -464,12 +484,17 @@ def build_onehop_query(
     object_node = q.add_node(q_object, q_object_category)
 
     # Add edge
-    edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[(q_subject_category, q_object_category)]
+    try:
+        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[(q_subject_category, q_object_category)]
+    except KeyError:
+        raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_category, q_object_category))
+
     edge_id = q.add_edge(subject_node, object_node, edge_predicate)
 
     # Add constraints
-    q.add_constraint('predicate_proxy', 'CHP:PredicateProxy', '==', outcome_name, edge_id=edge_id)
-    q.add_constraint(outcome_name, outcome, outcome_op, outcome_value, edge_id=edge_id)
+    if outcome is not None:
+        q.add_constraint('predicate_proxy', 'CHP:PredicateProxy', '==', outcome_name, edge_id=edge_id)
+        q.add_constraint(outcome_name, outcome, outcome_op, outcome_value, edge_id=edge_id)
     
     # Get context
     context = []
@@ -481,12 +506,12 @@ def build_onehop_query(
         context.append(BIOLINK_DISEASE)
 
     # Process context
-    q.add_constraint('predicate_context', 'CHP:PredicateContext', '==', context, edge_id=edge_id)
-    if genes is not None:
-        q.add_constraint(BIOLINK_GENE, BIOLINK_GENE, 'matches', genes, edge_id=edge_id)
-    if drugs is not None:
-        q.add_constraint(BIOLINK_DRUG, BIOLINK_DRUG, 'matches', drugs, edge_id=edge_id)
-    if disease is not None:
-        q.add_constraint(BIOLINK_DISEASE, BIOLINK_DISEASE, 'matches', disease, edge_id=edge_id)
-
+    if len(context) > 0:
+        q.add_constraint('predicate_context', 'CHP:PredicateContext', '==', context, edge_id=edge_id)
+        if genes is not None:
+            q.add_constraint(BIOLINK_GENE, BIOLINK_GENE, 'matches', genes, edge_id=edge_id)
+        if drugs is not None:
+            q.add_constraint(BIOLINK_DRUG, BIOLINK_DRUG, 'matches', drugs, edge_id=edge_id)
+        if disease is not None:
+            q.add_constraint(BIOLINK_DISEASE, BIOLINK_DISEASE, 'matches', disease, edge_id=edge_id)
     return q
