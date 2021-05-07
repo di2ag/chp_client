@@ -1,3 +1,9 @@
 [submodule "submodules/reasoner-validator"]
 	path = submodules/reasoner-validator
 	url = git@github.com:di2ag/reasoner-validator.git
+[submodule "submodules/trapi_model"]
+	path = submodules/trapi_model
+	url = git@github.com:di2ag/trapi_model.git
+[submodule "submodules/ncats_testing"]
+	path = submodules/ncats_testing
+	url = git@github.com:NCATSTranslator/testing.git

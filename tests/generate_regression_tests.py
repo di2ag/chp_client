@@ -3,6 +3,8 @@ import logging
 import random
 import sys
 
+from trapi_model.constants import *
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 stream_handler = logging.StreamHandler(sys.stdout)
@@ -52,32 +54,32 @@ class QueryBuildingRegressionSuite:
                 '1.1',
                 ]
         self.wildcard_options = [
-                'biolink:Gene',
-                'biolink:Drug',
+                BIOLINK_GENE,
+                BIOLINK_DRUG,
                 ]
 
         # Onehop query options
         self.q_object_category_options = [
-                'biolink:Gene',
-                'biolink:Drug',
+                BIOLINK_GENE,
+                BIOLINK_DRUG,
                 ]
         
         self.q_subject_category_options = [
-                'biolink:Disease',
-                'biolink:Gene',
-                'biolink:Drug',
+                BIOLINK_DISEASE,
+                BIOLINK_GENE,
+                BIOLINK_DRUG,
                 ]
 
         self.q_category_map = {
-                "biolink:Gene": [
+                BIOLINK_GENE: [
                     'GENE0001',
                     'GENE0002',
                     ],
-                "biolink:Drug": [
+                BIOLINK_DRUG: [
                     'DRUG0001',
                     'DRUG0001',
                     ],
-                "biolink:Disease": [
+                BIOLINK_DISEASE: [
                     'DIS0001',
                     'DIS0002',
                     ],

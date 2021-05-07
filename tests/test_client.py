@@ -14,9 +14,11 @@ import logging
 import sys
 import os
 from collections import defaultdict
+
+from trapi_model import Query
+
 from generate_regression_tests import QueryBuildingRegressionSuite
 from chp_client.exceptions import QueryBuildError
-
 from chp_client import get_client
 from chp_client.query import build_standard_query, build_wildcard_query, build_onehop_query
 
@@ -26,6 +28,24 @@ stream_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(stream_handler)
 #url = 'http://localhost:8000'
 url = None
+
+
+class TestNcatsRepo(unittest.TestCase):
+    def setUp(self):
+        self.ncats_test_dir = os.path.abspath('../submodules/ncats_testing')
+
+    def test_ars_predicates_queries(self):
+        ars_predicates_dir = os.path.join(self.ncats_test_dir, 'ars-requests/predicates')
+        # Added supported Query filenames to list below:
+        supported_query_filenames = [
+                'conditionGene.json',
+                'geneCondition.json',
+                ]
+        # Run tests
+        for filename in supported_query_filenames:
+            filepath = os.path.join(ars_predicates_dir, filename)
+            query = Query('1.0').load(query_filepath=filepath)
+            print(json.dumps(query.to_dict(), indent=2))
 
 class TestQuery2(unittest.TestCase):
     def setUp(self):
