@@ -6,6 +6,7 @@ import logging
 import pickle
 import random
 import json
+from collections import defaultdict
 
 from chp.trapi_interface import TrapiInterface
 
@@ -15,6 +16,8 @@ logger.setLevel(logging.INFO)
 
 # Set number of queries to build
 NUM_QUERIES = 10
+
+TRAPI_VERSIONS = ['1.0', '1.1']
 
 # Set seed
 random.seed(111)
@@ -29,25 +32,26 @@ curies = TrapiInterface().get_curies()
 logger.info('Got curies.')
 
 # Build all simple single gene, single drug, breast cancer, survival queries.
-queries = []
-for _ in range(NUM_QUERIES):
-    genes = [gene for gene in random.choices(list(curies["biolink:Gene"].keys()), k=random.randint(0,1))]
-    batch_genes = [gene for gene in random.choices(list(set(curies["biolink:Gene"].keys()) - set(genes)), k=random.randint(1,3))]
-    drugs = [drug for drug in random.choices(list(curies["biolink:Drug"].keys()), k=random.randint(0,1))]
-    batch_drugs = [drug for drug in random.choices(list(set(curies["biolink:Drug"].keys()) - set(drugs)), k=random.randint(1,3))]
-    q = build_standard_query(
-        genes=genes,
-        drugs=drugs,
-        disease='MONDO:0007254',
-        outcome_name='survival_time',
-        outcome='EFO:0000714', 
-        outcome_op='>=',
-        outcome_value=random.randint(1, 5000),
-        trapi_version='1.0',
-        batch_genes=batch_genes,
-        batch_drugs=batch_drugs,
-    )
-    queries.append(q.to_dict())
+queries = defaultdict(list)
+for trapi_version in TRAPI_VERSIONS:
+    for _ in range(NUM_QUERIES):
+        genes = [gene for gene in random.choices(list(curies["biolink:Gene"].keys()), k=random.randint(0,1))]
+        batch_genes = [gene for gene in random.choices(list(set(curies["biolink:Gene"].keys()) - set(genes)), k=random.randint(1,3))]
+        drugs = [drug for drug in random.choices(list(curies["biolink:Drug"].keys()), k=random.randint(0,1))]
+        batch_drugs = [drug for drug in random.choices(list(set(curies["biolink:Drug"].keys()) - set(drugs)), k=random.randint(1,3))]
+        q = build_standard_query(
+            genes=genes,
+            drugs=drugs,
+            disease='MONDO:0007254',
+            outcome_name='survival_time',
+            outcome='EFO:0000714', 
+            outcome_op='>',
+            outcome_value=random.randint(1, 5000),
+            trapi_version=trapi_version,
+            batch_genes=batch_genes,
+            batch_drugs=batch_drugs,
+        )
+        queries[trapi_version].append(q.to_dict())
 
 # Pickle the queries
 with open('random_batch_queries.pk', 'wb') as f_:

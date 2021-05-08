@@ -144,10 +144,10 @@ def build_wildcard_query(
     return query
 
 def build_onehop_query(
-        q_subject,
-        q_subject_category,
-        q_object,
-        q_object_category,
+        q_subjects,
+        q_subject_categories,
+        q_objects,
+        q_object_categories,
         genes=None,
         drugs=None,
         outcome=None,
@@ -163,21 +163,21 @@ def build_onehop_query(
     q = message.query_graph
 
     # Add nodes
-    subject_node = q.add_node(q_subject, q_subject_category)
-    object_node = q.add_node(q_object, q_object_category)
+    subject_node = q.add_node(q_subjects, q_subject_categories)
+    object_node = q.add_node(q_objects, q_object_categories)
 
     # Add edge
     try:
-        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[(q_subject_category, q_object_category)]
+        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[(q_subject_categories[0], q_object_categories[0])]
     except KeyError:
-        raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_category, q_object_category))
+        raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_categories[0], q_object_categories[0]))
 
     edge_id = q.add_edge(subject_node, object_node, edge_predicate)
 
     # Add constraints
     if outcome is not None:
-        q.add_constraint('predicate_proxy', 'CHP:PredicateProxy', '==', outcome_name, edge_id=edge_id)
-        q.add_constraint(outcome_name, outcome, outcome_op, outcome_value, edge_id=edge_id)
+        q.add_constraint('predicate_proxy', 'CHP:PredicateProxy', '==', [outcome], edge_id=edge_id)
+        q.add_constraint(outcome, outcome, outcome_op, outcome_value, edge_id=edge_id)
     
     # Get context
     context = []
