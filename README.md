@@ -28,7 +28,7 @@ The *chp_client* is a lightweight Python client for the NCATS Connections Hypoth
   
 # Installation
 ``` 
-git submodule update --init --recursive
+pip3 install -r requirements.txt
 python3 setup.py install 
 ```
 
@@ -81,9 +81,6 @@ In [4]: versions = default_client.versions()
 }
 ```
 
-```python3
-In [5]: default_client.query(q)
-```
 In the next section we will look at how to build CHP queries.
 
 # Building Supported CHP Queries
