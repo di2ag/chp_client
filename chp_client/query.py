@@ -37,9 +37,6 @@ def build_standard_query(
         batch_diseases=None,
         ):
 
-    if genes is None and drugs is None:
-        if batch_genes is None and batch_drugs is None:
-            raise QueryBuildError("Both genes and drugs can't be None.")
     if outcome is None:
         raise QueryBuildError('You must specify an outcome CURIE.')
     if outcome_op is None:
@@ -143,7 +140,7 @@ def build_wildcard_query(
             batch_diseases=batch_diseases,
             )
     q = query.message.query_graph
-    disease_node = q.find_nodes(categories=BIOLINK_DISEASE)[0]
+    disease_node = q.find_nodes(categories=BIOLINK_DISEASE_ENTITY)[0]
 
     wildcard_node = q.add_node(None, wildcard_category)
     # Add wildcard to query
@@ -156,10 +153,10 @@ def build_wildcard_query(
     return query
 
 def build_onehop_query(
-        q_subjects,
-        q_subject_categories,
-        q_objects,
-        q_object_categories,
+        q_object_category,
+        q_subject_category,
+        q_subject=None,
+        q_object=None,
         genes=None,
         drugs=None,
         outcome=None,
@@ -175,14 +172,14 @@ def build_onehop_query(
     q = message.query_graph
 
     # Add nodes
-    subject_node = q.add_node(q_subjects, q_subject_categories)
-    object_node = q.add_node(q_objects, q_object_categories)
+    subject_node = q.add_node(q_subject, q_subject_category)
+    object_node = q.add_node(q_object, q_object_category)
 
     # Add edge
     try:
         edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[q_subject_categories[0]][q_object_categories[0]]
     except KeyError:
-        raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_categories[0], q_object_categories[0]))
+        raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_category, q_object_category))
 
     edge_id = q.add_edge(subject_node, object_node, edge_predicate)
 
