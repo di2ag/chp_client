@@ -2,11 +2,12 @@
 - [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Active Instances](#active-instances)
 - [Quick Start](#quick-start)
 - [Building Supported Queries](#building-supported-chp-queries)
   - [One Hop Queries](#one-hop-queries)
   - [Standard Queries](#standard-probabilistic-queries)
-- [CHP Query Semantics](#chp-query-semantics)
+- [Build your own Instance for NCATS Deployment Pipeline](#build-your-own-instance-for-ncats-deployment-pipeline)
 - [API Documentation](#api-documentation)
 
 # Introduction
@@ -27,6 +28,31 @@ pip3 install -r requirements.txt
 python3 setup.py install 
 ```
 
+# Active Instances
+Our API Domain is:
+```json
+chp.thayer.dartmouth.edu
+```
+We also have subdomains accounted for particular disease types to narrow the scope for internal reasoning:
+```json
+breast.chp.thayer.dartmouth.edu
+brain.chp.thayer.dartmouth.edu
+lung.chp.thayer.dartmouth.edu
+```
+All endpoints have /query, /predicates, /curies and /versions functionality.
+
+To access Trapi 1.0 please prepend your /query with /v1.0.
+
+Example of main endpoint trapi 1.1 query
+```json
+chp.thayer.dartmouth.edu/query
+```
+Example of main endpoint trapi 1.0 query
+```json
+chp.thayer.dartmouth.edu/v1.0/query
+```
+
+
 # Quick Start
 Once you have installed the CHP client, useage is as simple as:
 ``` python3
@@ -38,7 +64,7 @@ In [3]: default_client = get_client()
 Now that you have an instance of the client, you can determine which query graph edge predicates are currently supported by CHP with:
 
 ```python3
-In[3]: default_client.predicates()
+In[4]: default_client.predicates()
 {
   "biolink:Gene": {
     "biolink:Disease": [
@@ -67,7 +93,7 @@ In[3]: default_client.predicates()
 And you can check the current versions of our repos:
 
 ```python3
-In [4]: versions = default_client.versions()
+In [5]: versions = default_client.versions()
 {
   "chp": "2.3.1",
   "chp_client": "1.1.3",
@@ -88,13 +114,13 @@ Our one hop structure allows associations to be built between genes and drugs, g
 
 To build and query CHP for the above query:
 ```python
-   In [ ]: q = build_onehop_query(
+   In [6]: q = build_onehop_query(
        ..: q_object_category = 'gene',
        ..: q_subject='CHEMBL:CHEMBL88',
        ..: q_subject_category='drug',
        ..: trapi_version='1.1',
        ..: )
-   In [ ]: response = client.query(q.to_dict())
+   In [7]: response = client.query(q.to_dict())
 ```
 An example response from this type of query graph is below:
 ```json
@@ -364,13 +390,13 @@ The edge attribute displays the contribution for the wildcard gene nodes.
 Similar to the previous query, we can find associations between drugs and genes where drugs is the wildcard.
 
 ```python
-   In [ ]: q = build_onehop_query(
+   In [8]: q = build_onehop_query(
        ..: q_object_category = 'gene',
        ..: q_subject='CHEMBL:CHEMBL88',
        ..: q_subject_category='drug',
        ..: trapi_version='1.1',
        ..: )
-   In [ ]: response = client.query(q.to_dict())
+   In [9]: response = client.query(q.to_dict())
 ```
 
 ### One Hop Drug Wildcard to Disease
@@ -378,13 +404,13 @@ Similar to the previous query, we can find associations between drugs and genes 
 <img src="media/disease_one_hop_drug.PNG" width=600>
 
 ```python
-   In [ ]: q = build_onehop_query(
-       ..: q_subject_category = 'disease',
-       ..: q_subject='MONDO:0007254',
-       ..: q_object_category='drug',
-       ..: trapi_version='1.1',
-       ..: )
-   In [ ]: response = client.query(q.to_dict())
+   In [10]: q = build_onehop_query(
+        ..: q_subject_category = 'disease',
+        ..: q_subject='MONDO:0007254',
+        ..: q_object_category='drug',
+        ..: trapi_version='1.1',
+        ..: )
+   In [11]: response = client.query(q.to_dict())
 ```
 
 ## Standard Probabilistic Queries
@@ -396,20 +422,20 @@ Our standard query is a straight probabilistic query of the form *P(Outcome | Ge
 Notice, that the CHP can handle multi-hop queries. We reason in the full contents of the query graph and return the appropriate response. In this case the respose will be a edge binding to the the disease to the phenotype in this query graph. Where the resultant calculated knowledge graph of this query graph will have a biolink:has_confidence_level attribute denoting the calculated probability for this query. We can build this query with the provided query module of the client with the following code:
 
 ```python
-In [6]: from chp_client.query import build_query
+In [12]: from chp_client.query import build_query
 
-In [7]: q = build_standard_query(
-   ...: genes=['ENSEMBL:ENSG00000121879'],
-   ...: drugs=['CHEMBL:CHEMBL88'],
-   ...: disease='MONDO:0007254',
-   ...: outcome='EFO:0000714',
-   ...: outcome_name='survival_time',
-   ...: outcome_op='>',
-   ...: outcome_value=700,
-   ...: trapi_version='1.1',
+In [13]: q = build_standard_query(
+    ...: genes=['ENSEMBL:ENSG00000121879'],
+    ...: drugs=['CHEMBL:CHEMBL88'],
+    ...: disease='MONDO:0007254',
+    ...: outcome='EFO:0000714',
+    ...: outcome_name='survival_time',
+    ...: outcome_op='>',
+    ...: outcome_value=700,
+    ...: trapi_version='1.1',
    )
    
-In [8]: response = client.query(q.to_dict())
+In [14]: response = client.query(q.to_dict())
 ```
 
 An example response from this type of query graph is below:
@@ -616,8 +642,8 @@ An example response from this type of query graph is below:
 You can extract the probability of the query manually from the TRAPI response data from CHP, but we have also provided a helper method inside the client to assist in extracting this probability.
 
 ```python
-In [9]: client.get_outcome_prob(response)
-Out[9]: 0.6562500000000003
+In [15]: client.get_outcome_prob(response)
+Out[16]: 0.6562500000000003
 ```
 
 The interpretation of this probability is that ~ 65% of all patients in our dataset with a somatic mutation in RAF1 gene that took Cyclophosphamide survived for more than 700 days after initial diagnosis.
@@ -628,13 +654,13 @@ The interpretation of this probability is that ~ 65% of all patients in our data
 <img src="media/standard_prob_no_ev.PNG" width=600>
 
 ```python
-In [10]: q = build_standard_query(
-   ...: disease='MONDO:0007254',
-   ...: outcome='EFO:0000714',
-   ...: outcome_name='survival_time',
-   ...: outcome_op='>',
-   ...: outcome_value=700,
-   ...: trapi_version='1.1',
+In [17]: q = build_standard_query(
+    ...: disease='MONDO:0007254',
+    ...: outcome='EFO:0000714',
+    ...: outcome_name='survival_time',
+    ...: outcome_op='>',
+    ...: outcome_value=700,
+    ...: trapi_version='1.1',
    )
 ```
 
@@ -643,18 +669,30 @@ In [10]: q = build_standard_query(
 <img src="media/standard_prob_all_the_evidence.PNG" width=600>
 
 ```python
-In [7]: q = build_standard_query(
-   ...: genes=['ENSEMBL:ENSG00000121879', 'ENSEMBL:ENSG00000141510', 'ENSEMBL:ENSG00000196557', 'ENSEMBL:ENSG00000132155'],
-   ...: drugs=['CHEMBL:CHEMBL88'],
-   ...: disease='MONDO:0007254',
-   ...: outcome='EFO:0000714',
-   ...: outcome_name='survival_time',
-   ...: outcome_op='>',
-   ...: outcome_value=1000,
-   ...: trapi_version='1.1',
+In [18]: q = build_standard_query(
+    ...: genes=['ENSEMBL:ENSG00000121879', 'ENSEMBL:ENSG00000141510', 'ENSEMBL:ENSG00000196557', 'ENSEMBL:ENSG00000132155'],
+    ...: drugs=['CHEMBL:CHEMBL88'],
+    ...: disease='MONDO:0007254',
+    ...: outcome='EFO:0000714',
+    ...: outcome_name='survival_time',
+    ...: outcome_op='>',
+    ...: outcome_value=1000,
+    ...: trapi_version='1.1',
    )
 ```
 
+# Build your own Instance for NCATS Deployment Pipeline
+```python
+In [19]: # First git clone chp_api somewhere that you want
+In [20]: git clone https:/github.com/NCATSTranslator/chp_api.git
+In [21]: # Go into the chp_api directory and run docker-compose
+In [22]: cd chp_api
+In [23]: docker-compose -f docker-compose.prod.yml build 
+In [24]: docker-compose -f docker-compose-prod.yml up -d
+In [25]: docker-compose -f docker-compose.prod.yml exec web python3 manage.py makemigrations
+In [26]: docker-compose -f docker-compose.prod.yml exec web python3 manage.py migrate --noinput
+In [27]: docker-compose -f docker-compose.prod.yml exec web python3 manage.py collectstatic --no-input --clear
+```
 
 # API Documentation
 * [CHP Client API Reference](docs/chp_client_reference.md#docs/chp_client_reference.md#chp-client-reference)
