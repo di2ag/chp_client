@@ -14,6 +14,7 @@ COMMON_ALIASES = {
         "_query_all": 'query_all',
         "_predicates": 'predicates',
         "_curies": 'curies',
+        "_versions": 'versions',
         "_get_outcome_prob": 'get_outcome_prob',
         "_get_ranked_wildcards": 'get_ranked_wildcards',
         "_constants": 'constants',
