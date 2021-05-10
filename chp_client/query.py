@@ -11,6 +11,17 @@ from trapi_model.biolink.constants import *
 
 from chp_client.exceptions import *
 
+OBJECT_TO_SUBJECT_PREDICATE_MAP = {
+        BIOLINK_GENE: {
+            BIOLINK_DRUG: BIOLINK_INTERACTS_WITH,
+            BIOLINK_DISEASE: BIOLINK_GENE_ASSOCIATED_WITH_CONDITION,
+            }
+        BIOLINK_DRUG: {
+            BIOLINK_GENE: BIOLINK_INTERACTS_WITH,
+            BIOLINK_DISEASE: BIOLINK_TREATS,
+            }
+        }
+
 def build_standard_query(
         genes=None,
         drugs=None,
@@ -59,14 +70,14 @@ def build_standard_query(
     
         # Connect all gene nodes to disease.
         for gene_node in gene_nodes:
-            q.add_edge(gene_node, disease_node, BIOLINK_GENE_TO_DISEASE_PREDICATE)
+            q.add_edge(gene_node, disease_node, BIOLINK_GENE_ASSOCIATED_WITH_CONDITION)
 
     # Setup batch genes
     if batch_genes is not None:
         if type(batch_genes) is not list:
             raise QueryBuildError('Batch genes must be a list.')
         batch_gene_node = q.add_node(batch_genes, BIOLINK_GENE)
-        q.add_edge(batch_gene_node, disease_node, BIOLINK_GENE_TO_DISEASE_PREDICATE)
+        q.add_edge(batch_gene_node, disease_node, BIOLINK_GENE_ASSOCIATED_WITH_CONDITION)
 
     if drugs is not None:
         # Add drug nodes
@@ -77,18 +88,18 @@ def build_standard_query(
 
         # Connect all drug nodes to disease.
         for drug_node in drug_nodes:
-            q.add_edge(drug_node, disease_node, BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE)
+            q.add_edge(drug_node, disease_node, BIOLINK_TREATS)
 
     # Setup batch drugs
     if batch_drugs is not None:
         if type(batch_drugs) is not list:
             raise QueryBuildError('Batch drugs must be a list.')
         batch_drug_node = q.add_node(batch_drugs, BIOLINK_DRUG)
-        q.add_edge(batch_drug_node, disease_node, BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE)
+        q.add_edge(batch_drug_node, disease_node, BIOLINK_TREATS)
 
     # Connect drug node to outcome node
     outcome_node = q.add_node(outcome, BIOLINK_PHENOTYPIC_FEATURE)
-    phenotype_edge = q.add_edge(disease_node, outcome_node, BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE)
+    phenotype_edge = q.add_edge(disease_node, outcome_node, BIOLINK_HAS_PHENOTYPE)
     q.add_constraint(outcome_name, outcome, outcome_op, outcome_value, edge_id=phenotype_edge)
 
     query = Query(trapi_version=trapi_version, biolink_version=biolink_version)
@@ -137,9 +148,9 @@ def build_wildcard_query(
     wildcard_node = q.add_node(None, wildcard_category)
     # Add wildcard to query
     if wildcard_category == BIOLINK_GENE:
-        q.add_edge(wildcard_node, disease_node, BIOLINK_GENE_TO_DISEASE_PREDICATE)
+        q.add_edge(wildcard_node, disease_node, BIOLINK_GENE_ASSOCIATED_WITH_CONDITION)
     elif wildcard_category == BIOLINK_DRUG:
-        q.add_edge(wildcard_node, disease_node, BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE)
+        q.add_edge(wildcard_node, disease_node, BIOLINK_TREATS)
     else:
         raise InvalidWildcardCategory(wildcard_category)
     return query
@@ -169,7 +180,7 @@ def build_onehop_query(
 
     # Add edge
     try:
-        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[(q_subject_categories[0], q_object_categories[0])]
+        edge_predicate = OBJECT_TO_SUBJECT_PREDICATE_MAP[(q_object_categories[0], q_subject_categories[0])]
     except KeyError:
         raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_categories[0], q_object_categories[0]))
 
