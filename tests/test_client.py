@@ -15,7 +15,7 @@ import sys
 import os
 from collections import defaultdict
 
-from trapi_model import Query
+from trapi_model.query import Query
 
 from generate_regression_tests import QueryBuildingRegressionSuite
 from chp_client.exceptions import QueryBuildError

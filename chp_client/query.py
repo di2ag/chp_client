@@ -5,8 +5,9 @@ Helper module for loading and building CHP queries.
 import json
 from jsonschema import ValidationError
 
-from trapi_model import Message, Query
-from trapi_model.constants import *
+from trapi_model.query import Query
+from trapi_model.message import Message
+from trapi_model.biolink.constants import *
 
 from chp_client.exceptions import *
 

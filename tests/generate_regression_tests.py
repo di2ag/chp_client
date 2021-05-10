@@ -3,7 +3,7 @@ import logging
 import random
 import sys
 
-from trapi_model.constants import *
+from trapi_model.biolink.constants import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
