@@ -8,7 +8,8 @@
   - [One Hop Queries](#one-hop-queries)
   - [Standard Queries](#standard-probabilistic-queries)
 - [Build your own Instance for NCATS Deployment Pipeline](#build-your-own-instance-for-ncats-deployment-pipeline)
-- [API Documentation](#api-documentation)
+- [Contacting API Directly](#contacting-api-directly)
+- [Other Notable Links](#other-notable-links)
 
 # Introduction
 The *chp_client* is a lightweight Python client for the NCATS Connections Hypothesis Provider (CHP). It is meant to be an easy-to-use wrapper utility to both run and build TRAPI queries the CHP web service will understand. Many of the CHP queries have been inspired by direct input from Translator ARAs and such ARAs may have their own dedicated CHP API client that returns results that they expect. However, there is also a default client that can handle generic CHP requests. 
@@ -694,6 +695,26 @@ In [26]: docker-compose -f docker-compose.prod.yml exec web python3 manage.py mi
 In [27]: docker-compose -f docker-compose.prod.yml exec web python3 manage.py collectstatic --no-input --clear
 ```
 
-# API Documentation
-* [CHP Client API Reference](docs/chp_client_reference.md#docs/chp_client_reference.md#chp-client-reference)
-* [CHP API Github Docs](https://github.com/di2ag/ConnectionsHypothesisProviderAPI)
+# Contacting API Directly
+
+```python
+In [28]: import requests
+In [29]: import json
+In [30]: # Display predicates
+In [31]: r = requests.get('http://chp.thayer.dartmouth.edu/predicates/')
+In [32]: json_formatted_str = json.dumps(json.loads(r.content), indent=2)
+In [33]: # Display all available curies
+In [34]: r = requests.get('http://chp.thayer.dartmouth.edu/curies/')
+In [35]: json_formatted_str = json.dumps(json.loads(r.content), indent=2)
+In [36]: # Query CHP
+In [37]: r = requests.post('http://chp.thayer.dartmouth.edu/query/', json=payload)
+In [38]: chp_res = json.dumps(json.loads(r.content), indent=2)
+
+
+```
+
+# Other Notable Links
+* [CHP Roadmap](https://github.com/di2ag/Connections-Hypothesis-Provider-Roadmap)
+* [CHP Wiki](https://github.com/NCATSTranslator/Translator-All/wiki/Connections-Hypothesis-Provider)
+* [Our CHP Repo](https://github.com/di2ag/chp)
+* [Our API Repo](https://github.com/di2ag/chp_api)
