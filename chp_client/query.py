@@ -11,11 +11,11 @@ from trapi_model.biolink.constants import *
 
 from chp_client.exceptions import *
 
-OBJECT_TO_SUBJECT_PREDICATE_MAP = {
+SUBJECT_TO_OBJECT_PREDICATE_MAP = {
         BIOLINK_GENE: {
             BIOLINK_DRUG: BIOLINK_INTERACTS_WITH,
             BIOLINK_DISEASE: BIOLINK_GENE_ASSOCIATED_WITH_CONDITION,
-            }
+            },
         BIOLINK_DRUG: {
             BIOLINK_GENE: BIOLINK_INTERACTS_WITH,
             BIOLINK_DISEASE: BIOLINK_TREATS,
@@ -180,7 +180,7 @@ def build_onehop_query(
 
     # Add edge
     try:
-        edge_predicate = OBJECT_TO_SUBJECT_PREDICATE_MAP[(q_object_categories[0], q_subject_categories[0])]
+        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[q_subject_categories[0]][q_object_categories[0]]
     except KeyError:
         raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_categories[0], q_object_categories[0]))
 
