@@ -46,15 +46,16 @@ def make_gene_wildcard_query():
         json.dump(query, f_)    
 
 def make_drug_wildcard_query():
-    query = build_query(
-            genes=["ENSEMBL:ENSG00000121879"],
-            disease="MONDO:0007254",
-            outcome=("EFO:0000714", ">=", 500),
-            therapeutic_wildcard=True,
-            )
+    for i in [1,2,5,10]:
+        query = build_query(
+                genes=["ENSEMBL:ENSG00000012048"],
+                disease="MONDO:0007254",
+                outcome=("EFO:0000714", ">=", 365*i),
+                therapeutic_wildcard=True,
+                )
 
-    with open('drug_wildcard.json', 'w') as f_:
-        json.dump(query, f_)
+        with open('dw_brac1_{}yr.json'.format(i), 'w') as f_:
+            json.dump(query, f_)
 
 def make_one_hop_query():
     query = build_query(
@@ -67,11 +68,11 @@ def make_one_hop_query():
         json.dump(query, f_)
 
 def main():
-    make_standard_probablistic_query_one_gene()
-    make_standard_probablistic_query_two_gene()
-    make_gene_wildcard_query()
+    #make_standard_probablistic_query_one_gene()
+    #make_standard_probablistic_query_two_gene()
+    #make_gene_wildcard_query()
     make_drug_wildcard_query()
-    make_one_hop_query()
+    #make_one_hop_query()
 
 if __name__ == "__main__":
     main()

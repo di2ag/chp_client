@@ -1,3 +1,4 @@
+from chp_client import get_client
 from chp_client.query import build_wildcard_query
 import itertools
 import tqdm
@@ -34,19 +35,21 @@ logger.info('Got curies.')
 queries = defaultdict(list)
 for trapi_version in TRAPI_VERSIONS:
     for _ in range(NUM_QUERIES):
-        genes = [gene for gene in random.choices(list(curies['biolink:Gene'].keys()), k=random.randint(1,2))]
+        drugs = [gene for gene in random.choices(list(curies['biolink:Drug'].keys()), k=random.randint(1,4))]
         q = build_wildcard_query(
-            genes=genes,
+            batch_drugs=drugs,
             disease='MONDO:0007254',
             outcome_name='survival_time',
             outcome='EFO:0000714', 
             outcome_op='>',
             outcome_value=random.randint(1, 5000),
             trapi_version=trapi_version,
-            wildcard_category='drug',
+            wildcard_category='gene',
             )
+        #print(q)
+        #input()
         queries[trapi_version].append(q.to_dict())
 
 # Pickle the queries
-with open('random_drug_wildcard_queries.pk', 'wb') as f_:
+with open('random_gene_wildcard_batch_queries.pk', 'wb') as f_:
     pickle.dump(queries, f_)

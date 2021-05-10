@@ -14,6 +14,7 @@ COMMON_ALIASES = {
         "_query_all": 'query_all',
         "_predicates": 'predicates',
         "_curies": 'curies',
+        "_versions": 'versions',
         "_get_outcome_prob": 'get_outcome_prob',
         "_get_ranked_wildcards": 'get_ranked_wildcards',
         "_constants": 'constants',
@@ -23,7 +24,7 @@ COMMON_ALIASES = {
 
 # Object creation kwargs common to all clients
 COMMON_KWARGS = {
-        "_default_url": 'http://chp.thayer.dartmouth.edu',
+        "_default_url": 'http://dev.thayer.dartmouth.edu',
         "_query_endpoint": '/query/',
         "_query_all_endpoint": '/queryall/',
         "_predicates_endpoint": '/predicates/',

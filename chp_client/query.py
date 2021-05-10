@@ -3,245 +3,209 @@ Helper module for loading and building CHP queries.
 """
 
 import json
-from chp_client.trapi_constants import *
+from jsonschema import ValidationError
 
-def load_query(filename):
-    """ Loads a saved JSON query.
-    """
-    with open(filename, 'r') as f_:
-        q = json.load(f_)
-    return q
+from trapi_model.query import Query
+from trapi_model.message import Message
+from trapi_model.biolink.constants import *
 
-def save_query(q, filename):
-    """ Saves a json query.
-    """
-    with open(filename, 'w') as f_:
-        json.dump(q, f_)
-    return filename
+from chp_client.exceptions import *
 
-def _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard):
-    if genes is None:
-        genes = []
-    # Error Handling
-    if len(genes) > 0:
-        if num_gene_wildcards > 0:
-            raise ValueError('Can not specify both a gene and a gene wildcard at the same time.')
-        if not therapeutic_wildcard:
-            raise ValueError('If you specify a gene than you must specify a therapeutic wildcard.')
-        if therapeutic is not None:
-            raise ValueError('If you specify a gene than you must specify a therapeutic wildcard.')
-    else:
-        if num_gene_wildcards == 0:
-            raise ValueError('You need to specify either a gene or a gene wildcard.')
-        if therapeutic_wildcard:
-            raise ValueError('If you specify a gene wildcard than you CAN NOT use therapeutic wildcard.')
-        if therapeutic is None:
-            raise ValueError('If you specify a gene wildcard than you CAN NOT use therapeutic wildcard.')
-    # Build the query
-    # empty response
-    message = {
-            "query_graph": {},
-            "knowledge_graph": {},
-            "results": []
+SUBJECT_TO_OBJECT_PREDICATE_MAP = {
+        BIOLINK_GENE: {
+            BIOLINK_DRUG: BIOLINK_INTERACTS_WITH,
+            BIOLINK_DISEASE: BIOLINK_GENE_ASSOCIATED_WITH_CONDITION,
+            },
+        BIOLINK_DRUG: {
+            BIOLINK_GENE: BIOLINK_INTERACTS_WITH,
+            BIOLINK_DISEASE: BIOLINK_TREATS,
             }
-    # empty query graph
-    message["query_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
+        }
 
-    # empty knowledge graph
-    message["knowledge_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
-
-    node_count = 0
-    edge_count = 0
-
-    # add genes
-    for gene in genes:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category":BIOLINK_GENE,
-                "id": gene
-                }
-        node_count += 1
-
-    # add gene wildcards (if applicable)
-    for _ in range(num_gene_wildcards):
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_GENE
-                }
-        node_count += 1
-
-
-    # add drugs
-    if therapeutic_wildcard:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_DRUG,
-                }
-        node_count += 1
-
-    elif therapeutic is not None:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_DRUG,
-                "id": therapeutic
-                }
-        node_count += 1
-
-    if node_count != 2:
-        raise ValueError('Malformed one hop query: Number of nodes are not 2. Check your inputs.')
-
-    # Link two nodes together
-    if num_gene_wildcards > 0 or len(genes) == 0:
-        # This is a gene wildcard query
-        for node_id, node in message["query_graph"]["nodes"].items():
-            if node["category"] == BIOLINK_GENE:
-                # Get object node
-                obj_node_id = list(set(message["query_graph"]["nodes"]) - {node_id})[0]
-                message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                        "predicate":BIOLINK_GENE_TO_CHEMICAL_PREDICATE,
-                        "subject": node_id,
-                        "object": obj_node_id
-                        }
-                edge_count += 1
-
-    elif therapeutic is None or therapeutic_wildcard:
-        # This is a gene wildcard query
-        for node_id, node in message["query_graph"]["nodes"].items():
-            if node["category"] == BIOLINK_DRUG:
-                # Get object node
-                obj_node_id = list(set(message["query_graph"]["nodes"]) - {node_id})[0]
-                message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                        "predicate":BIOLINK_CHEMICAL_TO_GENE_PREDICATE,
-                        "subject": node_id,
-                        "object": obj_node_id
-                        }
-                edge_count += 1
-
-    if edge_count != 1:
-        raise ValueError('Malformed query: Edge count was not equal to 1. Check your inputs.')
-
-    return {"message": message}
-
-def build_query(
+def build_standard_query(
         genes=None,
-        therapeutic=None,
+        drugs=None,
         outcome=None,
+        outcome_name=None,
+        outcome_op=None,
+        outcome_value=None,
         disease=None,
-        num_gene_wildcards=0,
-        therapeutic_wildcard=False,
-        one_hop=False
+        trapi_version='1.1',
+        biolink_version=None,
+        batch_genes=None,
+        batch_drugs=None,
+        batch_diseases=None,
         ):
-    """ Helper function to build CHP JSON queries.
 
-    Args:
-        genes: A list of ENSEMBL gene curies (max 10).
-        therapeutic: A string CHEMBL curie for a drug/therputic.
-        outcome: A patient outcome tuple of the form ({outcome curie}, {numerical inequality}, {float}).
-        disease: A MONDO disease curie string.
-        num_gene_wildcards: Number of gene wildcards that will be filled by CHP. Default: 0.
-        therapeutic_wildcard: Boolean letting CHP know if it should try to find a statistically important therapeutic. Default: False.
-        one_hop: A boolean that lets you build a one hop query (i.e. 2 nodes one edge) between either a gene/drug wildcard and a gene/drug
-            non wildcard. Uses a default surival time of >= 970 and disease is assumed to be breast cancer.
-    """
-    if one_hop:
-        return _build_one_hop(genes, therapeutic, num_gene_wildcards, therapeutic_wildcard)
-    # Initialize
-    if genes is None:
-        genes = []
+    if outcome is None:
+        raise QueryBuildError('You must specify an outcome CURIE.')
+    if outcome_op is None:
+        raise QueryBuildError("You must specify an outcome operation consistent with \
+                with your desired TRAPI version's Constraint Object.")
+    if outcome_value is None:
+        raise QueryBuildError('You must specify an outcome value to test.')
+    if disease is None and batch_diseases is None:
+        raise QueryBuildError('You must specify a disease.')
+    if disease is not None and batch_diseases is not None:
+        raise QueryBuildError('Only specify either diseases or batch diseases not both.')
 
-    # empty response
-    message = {
-            "query_graph": {},
-            "knowledge_graph": {},
-            "results": []
-            }
-    # empty query graph
-    message["query_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
+    # Initialize Message
+    message = Message(trapi_version, biolink_version)
+    q = message.query_graph
+    
+    # Add disease or batch disease node
+    if disease is not None:
+        disease_node = q.add_node(disease, BIOLINK_DISEASE)
+    else:
+        disease_node = q.add_node(batch_diseases, BIOLINK_DISEASE)
 
-    # empty knowledge graph
-    message["knowledge_graph"] = {
-            "edges": {},
-            "nodes": {}
-            }
+    if genes is not None:
+        # Add gene nodes
+        gene_nodes = []
+        for gene in genes:
+            gene_nodes.append(q.add_node(gene, BIOLINK_GENE))
+    
+        # Connect all gene nodes to disease.
+        for gene_node in gene_nodes:
+            q.add_edge(gene_node, disease_node, BIOLINK_GENE_ASSOCIATED_WITH_CONDITION)
 
-    node_count = 0
-    edge_count = 0
+    # Setup batch genes
+    if batch_genes is not None:
+        if type(batch_genes) is not list:
+            raise QueryBuildError('Batch genes must be a list.')
+        batch_gene_node = q.add_node(batch_genes, BIOLINK_GENE)
+        q.add_edge(batch_gene_node, disease_node, BIOLINK_GENE_ASSOCIATED_WITH_CONDITION)
 
-    # add genes
-    for gene in genes:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_GENE,
-                "id": gene
-                }
-        node_count += 1
+    if drugs is not None:
+        # Add drug nodes
+        if drugs is not None:
+            drug_nodes = []
+            for drug in drugs:
+                drug_nodes.append(q.add_node(drug, BIOLINK_DRUG))
 
-    # add gene wildcards (if applicable)
-    for _ in range(num_gene_wildcards):
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_GENE
-                }
-        node_count += 1
+        # Connect all drug nodes to disease.
+        for drug_node in drug_nodes:
+            q.add_edge(drug_node, disease_node, BIOLINK_TREATS)
+
+    # Setup batch drugs
+    if batch_drugs is not None:
+        if type(batch_drugs) is not list:
+            raise QueryBuildError('Batch drugs must be a list.')
+        batch_drug_node = q.add_node(batch_drugs, BIOLINK_DRUG)
+        q.add_edge(batch_drug_node, disease_node, BIOLINK_TREATS)
+
+    # Connect drug node to outcome node
+    outcome_node = q.add_node(outcome, BIOLINK_PHENOTYPIC_FEATURE)
+    phenotype_edge = q.add_edge(disease_node, outcome_node, BIOLINK_HAS_PHENOTYPE)
+    q.add_constraint(outcome_name, outcome, outcome_op, outcome_value, edge_id=phenotype_edge)
+
+    query = Query(trapi_version=trapi_version, biolink_version=biolink_version)
+    query.message = message
+    return query
 
 
-    # add drugs
-    if therapeutic_wildcard:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_DRUG,
-                }
-        node_count += 1
+def build_wildcard_query(
+        wildcard_category=None,
+        genes=None,
+        drugs=None,
+        outcome=None,
+        outcome_name=None,
+        outcome_op=None,
+        outcome_value=None,
+        disease=None,
+        trapi_version='1.1',
+        biolink_version=None,
+        batch_genes=None,
+        batch_drugs=None,
+        batch_diseases=None,
+        ):
 
-    elif therapeutic is not None:
-        message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-                "category": BIOLINK_DRUG,
-                "id": therapeutic
-                }
-        node_count += 1
+    if wildcard_category is None:
+        QueryBuildError('Wildcard category can not be None.')
 
-    # add in disease node
-    message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_DISEASE,
-            "id": disease
-            }
-    node_count += 1
+    
+    # Build standard query
+    query = build_standard_query(
+            genes, 
+            drugs,
+            outcome,
+            outcome_name,
+            outcome_op,
+            outcome_value,
+            disease,
+            trapi_version=trapi_version,
+            biolink_version=biolink_version,
+            batch_genes=batch_genes,
+            batch_drugs=batch_drugs,
+            batch_diseases=batch_diseases,
+            )
+    q = query.message.query_graph
+    disease_node = q.find_nodes(categories=BIOLINK_DISEASE_ENTITY)[0]
 
-    # link all evidence to disease
-    for node_id, node in message["query_graph"]["nodes"].items():
-        if node["category"] == BIOLINK_GENE:
-            message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "predicate":BIOLINK_GENE_TO_DISEASE_PREDICATE,
-                    "subject": node_id,
-                    "object": 'n{}'.format(node_count - 1)   # should be disease node
-                    }
-            edge_count += 1
-        elif node["category"] == BIOLINK_DRUG:
-            message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-                    "predicate":BIOLINK_CHEMICAL_TO_DISEASE_OR_PHENOTYPIC_FEATURE_PREDICATE,
-                    "subject": node_id,
-                    "object": 'n{}'.format(node_count -1)  # should be disease node
-                    }
-            edge_count += 1
+    wildcard_node = q.add_node(None, wildcard_category)
+    # Add wildcard to query
+    if wildcard_category == BIOLINK_GENE:
+        q.add_edge(wildcard_node, disease_node, BIOLINK_GENE_ASSOCIATED_WITH_CONDITION)
+    elif wildcard_category == BIOLINK_DRUG:
+        q.add_edge(wildcard_node, disease_node, BIOLINK_TREATS)
+    else:
+        raise InvalidWildcardCategory(wildcard_category)
+    return query
 
-    # add target outcome node
-    outcome_curie, op, value = outcome
-    message["query_graph"]["nodes"]['n{}'.format(node_count)] = {
-            "category": BIOLINK_PHENOTYPIC_FEATURE,
-            "id": outcome_curie,
-            }
-    node_count += 1
+def build_onehop_query(
+        q_object_category,
+        q_subject_category,
+        q_subject=None,
+        q_object=None,
+        genes=None,
+        drugs=None,
+        outcome=None,
+        outcome_name=None,
+        outcome_op=None,
+        outcome_value=None,
+        disease=None,
+        trapi_version='1.1',
+        biolink_version=None,
+        ):
+    # Initialize query
+    message = Message(trapi_version, biolink_version)
+    q = message.query_graph
 
-    # link disease to target
-    message["query_graph"]["edges"]['e{}'.format(edge_count)] = {
-            "predicate": BIOLINK_DISEASE_TO_PHENOTYPIC_FEATURE_PREDICATE,
-            "subject": 'n{}'.format(node_count-2),
-            "object": 'n{}'.format(node_count-1),
-            "properties": {
-                           "qualifier": op,
-                           "days": value
-                          }
-            }
-    return {"message": message}
+    # Add nodes
+    subject_node = q.add_node(q_subject, q_subject_category)
+    object_node = q.add_node(q_object, q_object_category)
+
+    # Add edge
+    try:
+        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[q_subject_category[0]][q_object_category[0]]
+    except KeyError:
+        raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_category, q_object_category))
+
+    edge_id = q.add_edge(subject_node, object_node, edge_predicate)
+
+    # Add constraints
+    if outcome is not None:
+        q.add_constraint('predicate_proxy', 'CHP:PredicateProxy', '==', [outcome], edge_id=edge_id)
+        q.add_constraint(outcome, outcome, outcome_op, outcome_value, edge_id=edge_id)
+    
+    # Get context
+    context = []
+    if genes is not None:
+        context.append(BIOLINK_GENE)
+    if drugs is not None:
+        context.append(BIOLINK_DRUG)
+    if disease is not None:
+        context.append(BIOLINK_DISEASE)
+
+    # Process context
+    if len(context) > 0:
+        q.add_constraint('predicate_context', 'CHP:PredicateContext', '==', context, edge_id=edge_id)
+        if genes is not None:
+            q.add_constraint(BIOLINK_GENE, BIOLINK_GENE, 'matches', genes, edge_id=edge_id)
+        if drugs is not None:
+            q.add_constraint(BIOLINK_DRUG, BIOLINK_DRUG, 'matches', drugs, edge_id=edge_id)
+        if disease is not None:
+            q.add_constraint(BIOLINK_DISEASE, BIOLINK_DISEASE, 'matches', disease, edge_id=edge_id)
+    query = Query(trapi_version=trapi_version, biolink_version=biolink_version)
+    query.message = message
+    return query
