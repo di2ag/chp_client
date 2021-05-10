@@ -18,16 +18,19 @@ The *chp_client* is a lightweight Python client for the NCATS Connections Hypoth
 
 # Requirements
   - Python >= 3.6
+  - [bmt](https://pypi.org/project/bmt/)
   - [requests](https://pypi.python.org/pypi/requests)
+  - submodules:
   
-## Optional libraries
-  - [requests_cache](https://pypi.python.org/pypi/requests-cache) *(Allows user to setup of requests caching.)*
-
+    1. [trapi_model](https://github.com/di2ag/trapi_model)
+    2. [reasoner-validator](https://github.com/di2ag/reasoner-validator)
+    3. [testing](https://github.com/NCATSTranslator/testing)
+  
 # Installation
-## Option 1
-``` python3 setup.py install ```
-## Option 2
-```pip3 install -e git+https://github.com/di2ag/chp_client#egg=chp_client```
+``` 
+git submodule update --init --recursive
+python3 setup.py install 
+```
 
 # Quick Start
 Once you have installed the CHP client, useage is as simple as:
@@ -42,73 +45,41 @@ Now that you have an instance of the client, you can determine which query graph
 ```python3
 In[3]: default_client.predicates()
 {
-  "biolink:Drug": {
-    "biolink:Gene": [
-      "biolink:ChemicalToGeneAssociation"
-    ],
+  "biolink:Gene": {
     "biolink:Disease": [
-      "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation"
+      "biolink:gene_associated_with_condition"
+    ],
+    "biolink:Drug": [
+      "biolink:interacts_with"
+    ]
+  },
+  "biolink:Drug": {
+    "biolink:Disease": [
+      "biolink:treats"
+    ],
+    "biolink:Gene": [
+      "biolink:interacts_with"
     ]
   },
   "biolink:Disease": {
     "biolink:PhenotypicFeature": [
-      "biolink:DiseaseToPhenotypicFeatureAssociation"
-    ]
-  },
-  "biolink:Gene": {
-    "biolink:Disease": [
-      "biolink:GeneToDiseaseAssociation"
+      "biolink:has_phenotype"
     ]
   }
 }
 ```
 
-And you can check the supported curies by:
+And you can check the current versions of our repos:
 
 ```python3
-In [4]: default_client.curies()
+In [4]: versions = default_client.versions()
 {
-  "biolink:Drug": [
-    {
-      "name": "ZOLADEX",
-      "id": "CHEMBL:CHEMBL1201247"
-    },
-    {
-      "name": "CYCLOPHOSPHAMIDE",
-      "id": "CHEMBL:CHEMBL88"
-    }, ...
-  ]
-  "biolink:PhenotypicFeature": [
-    {
-      "name": "survival_time",
-      "id": "EFO:0000714"
-    }
-  ],
-  "biolink:Disease": [
-    {
-      "name": "breast_cancer",
-      "id": "MONDO:0007254"
-    }
-  ],
-  "biolink:Gene": [
-    {
-      "name": "CLIP2",
-      "id": "ENSEMBL:ENSG00000106665"
-    },
-    {
-      "name": "PI4KA",
-      "id": "ENSEMBL:ENSG00000241973"
-    },
-    {
-      "name": "CELSR2",
-      "id": "ENSEMBL:ENSG00000143126"
-    }, ...
-  ]
+  "chp": "2.3.1",
+  "chp_client": "1.1.3",
+  "chp_data": "1.0.2",
+  "pybkb": "2.0.0"
 }
 ```
-This function will return a dictionary of supported biolink entities (NamedThings) that are supported by CHP along with a list of curies for each type. The list will include both our internal CHP name for the entity along with its associated curie for better human readability. *Note: When building query graphs only specify the appropriate curie. There is no need to also specify our internal name that we provide.*
-
-Now that we know which curies and predicates are supported by CHP we can post a query to CHP via:
 
 ```python3
 In [5]: default_client.query(q)
