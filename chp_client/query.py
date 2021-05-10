@@ -177,7 +177,7 @@ def build_onehop_query(
 
     # Add edge
     try:
-        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[q_subject_categories[0]][q_object_categories[0]]
+        edge_predicate = SUBJECT_TO_OBJECT_PREDICATE_MAP[q_subject_category[0]][q_object_category[0]]
     except KeyError:
         raise QueryBuildError('Edge from {} to {} is not supported.'.format(q_subject_category, q_object_category))
 
