@@ -1,15 +1,11 @@
 # Table of Contents
 - [Introduction](#introduction)
 - [Requirements](#requirements)
-  - [Optional libraries](#optional-libraries)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Building Supported Queries](#building-supported-chp-queries)
-  - [Standard Queries](#standard-probablistic-query-one-query-one-result)
-    - [Single Gene Queries](#single-gene-queries)
-    - [Multiple Gene Queries](#multi-gene-queries)
-  - [Gene Wildcard Queries](#gene-wildcard-query-one-query-many-results)
-  - [Drug Wildcard Queries](#drug-wildcard-query-one-query-many-results)
+  - [One Hop Queries](#one-hop-queries)
+  - [Standard Queries](#standard-probabilistic-queries)
 - [CHP Query Semantics](#chp-query-semantics)
 - [API Documentation](#api-documentation)
 
@@ -24,7 +20,6 @@ The *chp_client* is a lightweight Python client for the NCATS Connections Hypoth
   
     1. [trapi_model](https://github.com/di2ag/trapi_model)
     2. [reasoner-validator](https://github.com/di2ag/reasoner-validator)
-    3. [testing](https://github.com/NCATSTranslator/testing)
   
 # Installation
 ``` 
@@ -36,8 +31,8 @@ python3 setup.py install
 Once you have installed the CHP client, useage is as simple as:
 ``` python3
 In [1]: from chp_client import get_client
-
-In [2]: default_client = get_client()
+In [2]: from chp_client.query import build_standard_query, build_wildcard_query, build_onehop_query
+In [3]: default_client = get_client()
 ```
 
 Now that you have an instance of the client, you can determine which query graph edge predicates are currently supported by CHP with:
@@ -86,25 +81,335 @@ In the next section we will look at how to build CHP queries.
 # Building Supported CHP Queries
 As CHP is TRAPI compliant a large subset of queries can be built with a wide variety of structures. In order to scope the query building problem, we have currently limited the structures of queries that can be asked and have detailed their respective semantics. *Note: As the Translator and Biolink models develop we intend to ease these restrictions.*
 
-## Standard Probablistic Query (One query, one result)
-### Single Gene Queries
+## One Hop Queries
+Our one hop structure allows associations to be built between genes and drugs, genes and diseases and drugs and disease where one node is a wildcard. Returned are nodes that contributed to our underlying probablistic semantics of P(survival_time > x | evidence).
+### One Hop Drug to Gene Wildcard 
+<img src="media/one_hop_gene.PNG" width=600>
+
+To build and query CHP for the above query:
+```python
+   In [ ]: q = build_onehop_query(
+       ..: q_object_category = 'gene',
+       ..: q_subject='CHEMBL:CHEMBL88',
+       ..: q_subject_category='drug',
+       ..: trapi_version='1.1',
+       ..: )
+   In [ ]: response = client.query(q.to_dict())
+```
+An example response from this type of query graph is below:
+```json
+"knowledge_graph": {
+  "nodes": {
+    "CHEMBL:CHEMBL88": {
+      "name": "CYCLOPHOSPHAMIDE",
+      "categories": [
+        "biolink:Drug"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000141510": {
+      "name": "TP53",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000129003": {
+      "name": "VPS13C",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000155657": {
+      "name": "TTN",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000181143": {
+      "name": "MUC16",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000196632": {
+      "name": "WNK3",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000127481": {
+      "name": "UBR4",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000169855": {
+      "name": "ROBO1",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000005810": {
+      "name": "MYCBP2",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000118473": {
+      "name": "SGIP1",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    },
+    "ENSEMBL:ENSG00000198626": {
+      "name": "RYR2",
+      "categories": [
+        "biolink:Gene"
+      ],
+      "attributes": []
+    }
+  },
+  "edges": {
+    "e0": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000141510",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.015305072994577756,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e1": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000129003",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.011937490158826738,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e2": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000155657",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.011265657498001666,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e3": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000181143",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.0107876150199956,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e4": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000196632",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.010529562080332809,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e5": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000127481",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.010210255955874721,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e6": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000169855",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.01018732959144447,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e7": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000005810",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.009817363716694328,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e8": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000118473",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": -0.009675879792795597,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    },
+    "e9": {
+      "predicate": "biolink:interacts_with",
+      "relation": null,
+      "subject": "CHEMBL:CHEMBL88",
+      "object": "ENSEMBL:ENSG00000198626",
+      "attributes": [
+        {
+          "attribute_type_id": "Contribution",
+          "original_attribute_name": null,
+          "value": 0.008687240281302784,
+          "value_type_id": "biolink:has_evidence",
+          "attribute_source": null,
+          "value_url": null,
+          "description": null
+        }
+      ]
+    }
+  }
+}
+```
+#### Extracting the Statiscally Important Genes
+CHP uses a method called Contributions Analysis to analyze gene importance and thereby rank genes. When the probability of the subgraph query (i.e. everything except the gene wildcards) is calculated, it carries with it a probabilistic mass. Contribution analysis tracks the amount of mass each component in our model contributed to the total mass (i.e. that final probability value of the query subgraph). As gene mutations play a significant role in our model, we are able to track each gene mutation's contribution to the total probabillistic mass, allowing us to yield our ranked gene results. The interpretation of these ranked genes should be that they are the genes that contributed most to supporting the given query.
+
+The edge attribute displays the contribution for the wildcard gene nodes.
+
+### One Hop Gene to Drug Wildcard
+
+<img src="media/one_hop_drug.PNG" width=600>
+
+Similar to the previous query, we can find associations between drugs and genes where drugs is the wildcard.
+
+```python
+   In [ ]: q = build_onehop_query(
+       ..: q_object_category = 'gene',
+       ..: q_subject='CHEMBL:CHEMBL88',
+       ..: q_subject_category='drug',
+       ..: trapi_version='1.1',
+       ..: )
+   In [ ]: response = client.query(q.to_dict())
+```
+
+### One Hop Drug Wildcard to Disease
+
+<img src="media/disease_one_hop_drug.PNG" width=600>
+
+```python
+   In [ ]: q = build_onehop_query(
+       ..: q_subject_category = 'disease',
+       ..: q_subject='MONDO:0007254',
+       ..: q_object_category='drug',
+       ..: trapi_version='1.1',
+       ..: )
+   In [ ]: response = client.query(q.to_dict())
+```
+
+## Standard Probabilistic Queries
+### Query format
 Our standard query is a straight probabilistic query of the form *P(Outcome | Gene Mutations, Disease, Therapeutics, ...)*. We can see a graphical representation of a query below:
 
-<img src="media/qg-oneGene_oneDrug.png" width=600>
+<img src="media/standard_prob_gene_drug.PNG" width=600>
 
-Notice, that the CHP is inherently a multi-hop knowledge provider. We reason in the full contents of the query graph and return the appropriate response. In this case the respose will be a edge binding to the disease_to_phenotypic_feature_association in this query graph. Where the resultant calculated knowledge graph of this query graph will have a *has_confidence* attribute denoting the calculated probability for this query. We can build this query with the provided query module of the client with the following code:
+Notice, that the CHP can handle multi-hop queries. We reason in the full contents of the query graph and return the appropriate response. In this case the respose will be a edge binding to the the disease to the phenotype in this query graph. Where the resultant calculated knowledge graph of this query graph will have a biolink:has_confidence_level attribute denoting the calculated probability for this query. We can build this query with the provided query module of the client with the following code:
 
 ```python
 In [6]: from chp_client.query import build_query
 
-In [7]: q = build_query(
-   ...: genes=['ENSEMBL:ENSG00000141510'],
-   ...: therapeutic='CHEMBL:CHEMBL1201585',
+In [7]: q = build_standard_query(
+   ...: genes=['ENSEMBL:ENSG00000121879'],
+   ...: drugs=['CHEMBL:CHEMBL88'],
    ...: disease='MONDO:0007254',
-   ...: outcome=('EFO:0000714', '>=', 500)
+   ...: outcome='EFO:0000714',
+   ...: outcome_name='survival_time',
+   ...: outcome_op='>',
+   ...: outcome_value=700,
+   ...: trapi_version='1.1',
    )
    
-In [8]: response = client.query(q)
+In [8]: response = client.query(q.to_dict())
 ```
 
 An example response from this type of query graph is below:
@@ -113,83 +418,146 @@ An example response from this type of query graph is below:
 {
   "message": {
     "query_graph": {
-      "edges": {
-        "e0": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "n0",
-          "object": "n2"
-        },
-        "e1": {
-          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-          "subject": "n1",
-          "object": "n2"
-        },
-        "e2": {
-          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
-          "subject": "n2",
-          "object": "n3",
-          "properties": {
-            "qualifier": ">=",
-            "days": 500
-          }
-        }
-      },
       "nodes": {
         "n0": {
-          "category": "biolink:Gene",
-          "id": "ENSEMBL:ENSG00000141510"
+          "ids": [
+            "MONDO:0007254"
+          ],
+          "categories": [
+            "biolink:Disease"
+          ],
+          "constraints": []
         },
         "n1": {
-          "category": "biolink:Drug",
-          "id": "CHEMBL:CHEMBL1201585"
+          "ids": [
+            "ENSEMBL:ENSG00000121879"
+          ],
+          "categories": [
+            "biolink:Gene"
+          ],
+          "constraints": []
         },
         "n2": {
-          "category": "biolink:Disease",
-          "id": "MONDO:0007254"
+          "ids": [
+            "CHEMBL:CHEMBL88"
+          ],
+          "categories": [
+            "biolink:Drug"
+          ],
+          "constraints": []
         },
         "n3": {
-          "category": "biolink:PhenotypicFeature",
-          "id": "EFO:0000714"
+          "ids": [
+            "EFO:0000714"
+          ],
+          "categories": [
+            "biolink:PhenotypicFeature"
+          ],
+          "constraints": []
+        }
+      },
+      "edges": {
+        "e0": {
+          "predicates": [
+            "biolink:gene_associated_with_condition"
+          ],
+          "relation": null,
+          "subject": "n1",
+          "object": "n0",
+          "constraints": []
+        },
+        "e1": {
+          "predicates": [
+            "biolink:treats"
+          ],
+          "relation": null,
+          "subject": "n2",
+          "object": "n0",
+          "constraints": []
+        },
+        "e2": {
+          "predicates": [
+            "biolink:has_phenotype"
+          ],
+          "relation": null,
+          "subject": "n0",
+          "object": "n3",
+          "constraints": [
+            {
+              "name": "survival_time",
+              "id": "EFO:0000714",
+              "operator": ">",
+              "value": 700,
+              "unit_id": null,
+              "unit_name": null,
+              "not": false
+            }
+          ]
         }
       }
     },
     "knowledge_graph": {
-      "edges": {
-        "kge0": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ENSEMBL:ENSG00000141510",
-          "object": "MONDO:0007254"
-        },
-        "kge1": {
-          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-          "subject": "CHEMBL:CHEMBL1201585",
-          "object": "MONDO:0007254"
-        },
-        "kge2": {
-          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
-          "subject": "MONDO:0007254",
-          "object": "EFO:0000714",
-          "properties": {
-            "qualifier": ">=",
-            "days": 500
-          },
-          "has_confidence_level": 0.8499999999999999
-        }
-      },
       "nodes": {
-        "ENSEMBL:ENSG00000132155": {
-          "category": "biolink:Gene",
-          "name": "TP53"
-        },
-        "CHEMBL:CHEMBL1201585": {
-          "category": "biolink:Drug",
-          "name": "TRASTUZUMAB"
-        },
         "MONDO:0007254": {
-          "category": "biolink:Disease"
+          "name": "MONDO:0007254",
+          "categories": [
+            "biolink:Disease"
+          ],
+          "attributes": []
+        },
+        "ENSEMBL:ENSG00000121879": {
+          "name": "PIK3CA",
+          "categories": [
+            "biolink:Gene"
+          ],
+          "attributes": []
+        },
+        "CHEMBL:CHEMBL88": {
+          "name": "CYCLOPHOSPHAMIDE",
+          "categories": [
+            "biolink:Drug"
+          ],
+          "attributes": []
         },
         "EFO:0000714": {
-          "category": "biolink:PhenotypicFeature"
+          "name": "EFO:0000714",
+          "categories": [
+            "biolink:PhenotypicFeature"
+          ],
+          "attributes": []
+        }
+      },
+      "edges": {
+        "e0": {
+          "predicate": "biolink:gene_associated_with_condition",
+          "relation": null,
+          "subject": "ENSEMBL:ENSG00000121879",
+          "object": "MONDO:0007254",
+          "attributes": []
+        },
+        "e1": {
+          "predicate": "biolink:treats",
+          "relation": null,
+          "subject": "CHEMBL:CHEMBL88",
+          "object": "MONDO:0007254",
+          "attributes": []
+        },
+        "e2": {
+          "predicate": "biolink:has_phenotype",
+          "relation": null,
+          "subject": "MONDO:0007254",
+          "object": "EFO:0000714",
+          "attributes": [
+            {
+              "attribute_type_id": "Probability of Survival",
+              "original_attribute_name": null,
+              "value": 0.6562500000000003,
+              "value_type_id": "biolink:has_confidence_level",
+              "attribute_source": null,
+              "value_url": null,
+              "description": null
+            }
+          ]
         }
       }
     },
@@ -198,34 +566,34 @@ An example response from this type of query graph is below:
         "edge_bindings": {
           "e0": [
             {
-              "id": "kge0"
+              "id": "e0"
             }
           ],
           "e1": [
             {
-              "id": "kge1"
+              "id": "e1"
             }
           ],
           "e2": [
             {
-              "id": "kge2"
+              "id": "e2"
             }
           ]
         },
         "node_bindings": {
           "n0": [
             {
-              "id": "ENSEMBL:ENSG00000141510"
+              "id": "MONDO:0007254"
             }
           ],
           "n1": [
             {
-              "id": "CHEMBL:CHEMBL1201585"
+              "id": "ENSEMBL:ENSG00000121879"
             }
           ],
           "n2": [
             {
-              "id": "MONDO:0007254"
+              "id": "CHEMBL:CHEMBL88"
             }
           ],
           "n3": [
@@ -236,8 +604,11 @@ An example response from this type of query graph is below:
         }
       }
     ]
-  }
-}
+  },
+  "max_results": 10,
+  "trapi_version": "1.1",
+  "biolink_version": null,
+  "pk": "e7634da0-e977-482a-b8ba-fc65044a1f39"
 
 ```
 
@@ -246,942 +617,44 @@ You can extract the probability of the query manually from the TRAPI response da
 
 ```python
 In [9]: client.get_outcome_prob(response)
-Out[9]: 0.8499999999999999
+Out[9]: 0.6562500000000003
 ```
 
-The interpretation of this probability is that all patients in our dataset with a somatic mutation in RAF1 gene that took herceptin survived for more than 500 days after initial diagnosis.
+The interpretation of this probability is that ~ 65% of all patients in our dataset with a somatic mutation in RAF1 gene that took Cyclophosphamide survived for more than 700 days after initial diagnosis.
 
-### Multi-Gene Queries
-As the CHP is inherenly multi-hop, we can easily add multiple genes to our query graph and calcuate the probability of a patient outcome in the presence of multiple gene mutations. A sample query graph is below *(We have not graphed the edge labels for ease of view but they are there in the query graph)*:
+### Other Examples
+#### No Evidence
 
-<img src="media/qg-manyGenes_oneDrug.png" width=600>
-
-A result from the CHP will again be a single edge binding as in the single gene case with the associated probability of the query in the *has_confidence_level* attribute. We can also use our *build_query* function instead the CHP client's query module to build a Multi-Gene query. Example code for building the above query is:
+<img src="media/standard_prob_no_ev.PNG" width=600>
 
 ```python
-In [10]: q = build_query(
-   ...: genes=['ENSEMBL:ENSG00000132155', 'ENSEMBL:ENSG00000196557', 'ENSEMBL:ENSG00000141510'],
-   ...: therapeutic='CHEMBL:CHEMBL1201585',
+In [10]: q = build_standard_query(
    ...: disease='MONDO:0007254',
-   ...: outcome=('EFO:0000714', '>=', 2000)
+   ...: outcome='EFO:0000714',
+   ...: outcome_name='survival_time',
+   ...: outcome_op='>',
+   ...: outcome_value=700,
+   ...: trapi_version='1.1',
    )
-   
-In [11]: response = client.query(q)
 ```
 
-A sample json response from this multi-gene query is below:
+#### All the evidence
 
-```json
-"message": {
-    "query_graph": {
-      "edges": {
-        "e0": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "n0",
-          "object": "n4"
-        },
-        "e1": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "n1",
-          "object": "n4"
-        },
-        "e2": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "n2",
-          "object": "n4"
-        },
-        "e3": {
-          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-          "subject": "n3",
-          "object": "n4"
-        },
-        "e4": {
-          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
-          "subject": "n4",
-          "object": "n5",
-          "properties": {
-            "qualifier": ">=",
-            "days": 500
-          }
-        }
-      },
-      "nodes": {
-        "n0": {
-          "category": "biolink:Gene",
-          "id": "ENSEMBL:ENSG00000132155"
-        },
-        "n1": {
-          "category": "biolink:Gene",
-          "id": "ENSEMBL:ENSG00000196557"
-        },
-        "n2": {
-          "category": "biolink:Gene",
-          "id": "ENSEMBL:ENSG00000196557"
-        },
-        "n3": {
-          "category": "biolink:Drug",
-          "id": "CHEMBL:CHEMBL1201585"
-        },
-        "n4": {
-          "category": "biolink:Disease",
-          "id": "MONDO:0007254"
-        },
-        "n5": {
-          "category": "biolink:PhenotypicFeature",
-          "id": "EFO:0000714"
-        }
-      }
-    },
-    "knowledge_graph": {
-      "edges": {
-        "kge0": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ENSEMBL:ENSG00000132155",
-          "object": "MONDO:0007254"
-        },
-        "kge1": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ENSEMBL:ENSG00000196557",
-          "object": "MONDO:0007254"
-        },
-        "kge2": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ENSEMBL:ENSG00000196557",
-          "object": "MONDO:0007254"
-        },
-        "kge3": {
-          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-          "subject": "CHEMBL:CHEMBL1201585",
-          "object": "MONDO:0007254"
-        },
-        "kge4": {
-          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
-          "subject": "MONDO:0007254",
-          "object": "EFO:0000714",
-          "properties": {
-            "qualifier": ">=",
-            "days": 500
-          },
-          "has_confidence_level": -1
-        }
-      },
-      "nodes": {
-        "ENSEMBL:ENSG00000132155": {
-          "category": "biolink:Gene",
-          "name": "RAF1"
-        },
-        "ENSEMBL:ENSG00000196557": {
-          "category": "biolink:Gene",
-          "name": "CACNA1H"
-        },
-        "CHEMBL:CHEMBL1201585": {
-          "category": "biolink:Drug",
-          "name": "TRASTUZUMAB"
-        },
-        "MONDO:0007254": {
-          "category": "biolink:Disease"
-        },
-        "EFO:0000714": {
-          "category": "biolink:PhenotypicFeature"
-        }
-      }
-    },
-    "results": [
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge1"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge2"
-            }
-          ],
-          "e3": [
-            {
-              "id": "kge3"
-            }
-          ],
-          "e4": [
-            {
-              "id": "kge4"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "ENSEMBL:ENSG00000132155"
-            }
-          ],
-          "n1": [
-            {
-              "id": "ENSEMBL:ENSG00000196557"
-            }
-          ],
-          "n2": [
-            {
-              "id": "ENSEMBL:ENSG00000196557"
-            }
-          ],
-          "n3": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n4": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n5": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      }
-    ]
-  }
-}
-```
-
-#### Extracting Query Probability
-You can extract the probability of the query manually from the TRAPI response data from CHP the same way as for a single gene query, as well as using the *get_outcome_prob* function as we did in the single gene query.
+<img src="media/standard_prob_all_the_evidence.PNG" width=600>
 
 ```python
-In [12]: client.get_outcome_prob(response)
-Out[12]: -1
+In [7]: q = build_standard_query(
+   ...: genes=['ENSEMBL:ENSG00000121879', 'ENSEMBL:ENSG00000141510', 'ENSEMBL:ENSG00000196557', 'ENSEMBL:ENSG00000132155'],
+   ...: drugs=['CHEMBL:CHEMBL88'],
+   ...: disease='MONDO:0007254',
+   ...: outcome='EFO:0000714',
+   ...: outcome_name='survival_time',
+   ...: outcome_op='>',
+   ...: outcome_value=1000,
+   ...: trapi_version='1.1',
+   )
 ```
 
-**Interpreting a -1 probability result:** A -1 query probability is not an error and should not be treated as simply zero. What this value actually means is that CHP was not able to find an inference that supported all the gene and therauptic evidence with the given outcome condition. This is an inherent artifact of probabilistic incompleteness. The interpretation should instead be that there is insufficient information in our dataset/model to provide an answer to the query.
-
-## Gene Wildcard Query (One query, many results)
-CHP also has the capability to statistically rank genes based on their overall importance to a query. We call these *Gene Wildcard* queries, as the goal is to fill in the most statistically important gene into the wildcard placeholder node. A sample query graph is located below:
-
-<img src="media/qg-geneWildcard.png" width=600>
-
-In this query the CHP will calculate the standard probabilistic query of the subgraph not including the gene wildcard, i.e. *P(outcome | therapuetic, disease, etc)*. We can also use the *build_query* function in the CHP client query module to build a gene wildcard query.
-
-```python
-In [13]: q = build_query(
-    ...: therapeutic='CHEMBL:CHEMBL1201585',
-    ...: disease='MONDO:0007254',
-    ...: outcome=('EFO:0000714', '>=', 500),
-    ...: num_gene_wildcards=1
-    )
-
-ln [14]: client.query(q)
-```
-
-The sample json response from this query is:
-
-```json
-{
-  "message": {
-    "query_graph": {
-      "edges": {
-        "e0": {
-          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
-          "subject": "n2",
-          "object": "n3",
-          "properties": {
-            "qualifier": ">=",
-            "days": 500
-          }
-        },
-        "e1": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "n1",
-          "object": "n2"
-        },
-        "e2": {
-          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-          "subject": "n0",
-          "object": "n2"
-        }
-      },
-      "nodes": {
-        "n0": {
-          "category": "biolink:Drug",
-          "id": "CHEMBL:CHEMBL1201585"
-        },
-        "n1": {
-          "category": "biolink:Gene"
-        },
-        "n2": {
-          "category": "biolink:Disease",
-          "id": "MONDO:0007254"
-        },
-        "n3": {
-          "category": "biolink:PhenotypicFeature",
-          "id": "EFO:0000714"
-        }
-      }
-    },
-    "knowledge_graph": {
-      "edges": {
-        "kge0": {
-          "predicate": "biolink:DiseaseToPhenotypicFeatureAssociation",
-          "subject": "MONDO:0007254",
-          "object": "EFO:0000714",
-          "properties": {
-            "qualifier": ">=",
-            "days": 500
-          },
-          "has_confidence_level": 0.8412698412698413
-        },
-        "kge1": {
-          "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-          "subject": "CHEMBL:CHEMBL1201585",
-          "object": "MONDO:0007254"
-        },
-        "kge3": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "MUC16",
-          "object": "MONDO:0007254",
-          "value": -0.12169811320754698
-        },
-        "kge4": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ABCA8",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge5": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "NAV1",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge6": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "MYEF2",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge7": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ROBO1",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge8": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "DNAH11",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge9": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "MYH6",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge10": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "CXorf36",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge11": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "ARFGEF2",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        },
-        "kge12": {
-          "predicate": "biolink:GeneToDiseaseAssociation",
-          "subject": "MYH15",
-          "object": "MONDO:0007254",
-          "value": -0.09999999999999983
-        }
-      },
-      "nodes": {
-        "CHEMBL:CHEMBL1201585": {
-          "category": "biolink:Drug",
-          "name": "TRASTUZUMAB"
-        },
-        "MONDO:0007254": {
-          "category": "biolink:Disease"
-        },
-        "EFO:0000714": {
-          "category": "biolink:PhenotypicFeature"
-        },
-        "MUC16": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000181143"
-        },
-        "ABCA8": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000141338"
-        },
-        "NAV1": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000134369"
-        },
-        "MYEF2": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000104177"
-        },
-        "ROBO1": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000169855"
-        },
-        "DNAH11": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000105877"
-        },
-        "MYH6": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000197616"
-        },
-        "CXorf36": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000147113"
-        },
-        "ARFGEF2": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000124198"
-        },
-        "MYH15": {
-          "category": "biolink:Gene",
-          "name": "ENSEMBL:ENSG00000144821"
-        }
-      }
-    },
-    "results": [
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge3"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "MUC16"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge4"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "ABCA8"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge5"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "NAV1"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge6"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "MYEF2"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge7"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "ROBO1"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge8"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "DNAH11"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge9"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "MYH6"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge10"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "CXorf36"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge11"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "ARFGEF2"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      },
-      {
-        "edge_bindings": {
-          "e0": [
-            {
-              "id": "kge0"
-            }
-          ],
-          "e1": [
-            {
-              "id": "kge12"
-            }
-          ],
-          "e2": [
-            {
-              "id": "kge1"
-            }
-          ]
-        },
-        "node_bindings": {
-          "n0": [
-            {
-              "id": "CHEMBL:CHEMBL1201585"
-            }
-          ],
-          "n1": [
-            {
-              "id": "MYH15"
-            }
-          ],
-          "n2": [
-            {
-              "id": "MONDO:0007254"
-            }
-          ],
-          "n3": [
-            {
-              "id": "EFO:0000714"
-            }
-          ]
-        }
-      }
-    ]
-  }
-}
-
-```
-#### Extracting the Statiscally Important Genes
-CHP uses a method called Contributions Analysis to analyze gene importance and thereby rank genes. When the probability of the subgraph query (i.e. everything except the gene wildcards) is calculated, it carries with it a probabilistic mass. Contribution analysis tracks the amount of mass each component in our model contributed to the total mass (i.e. that final probability value of the query subgraph). As gene mutations play a significant role in our model, we are able to track each gene mutation's contribution to the total probabillistic mass, allowing us to yield our ranked gene results. The interpretation of these ranked genes should be that they are the genes that contributed most to supporting the given query.
-
-You can extract this information manually from the TRAPI CHP response results section. The first result will always be the standard probability query of the subgraph (not including any genes). We can extract this information with the same *get_outcome_prob* command.
-
-```python
-In [15]: client.get_outcome_prob(response)
-Out[15]: 0.8412698412698413
-```
-
-The next *n* results are the ranked gene graphs where the gene wildcard has been replaced by a gene instantiation by CHP, while also adding an edge weight (contributation value) to the associated *gene_to_disease_association* edge. We can further extract this ranked list of genes with the *get_ranked_wildcards* chp client helper function.
-
-```python
-In [16]: ranked = client.get_ranked_wildcards(response)
-
-In [17]: print(json.dumps(ranked, indent=2))
-{
-  "Biolink:Gene": [
-    {
-      "weight": -0.12169811320754698,
-      "id": "ENSEMBL:ENSG00000181143",
-      "name": "MUC16"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000141338",
-      "name": "ABCA8"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000134369",
-      "name": "NAV1"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000104177",
-      "name": "MYEF2"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000169855",
-      "name": "ROBO1"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000105877",
-      "name": "DNAH11"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000197616",
-      "name": "MYH6"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000147113",
-      "name": "CXorf36"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000124198",
-      "name": "ARFGEF2"
-    },
-    {
-      "weight": -0.09999999999999983,
-      "id": "ENSEMBL:ENSG00000144821",
-      "name": "MYH15"
-    }
-  ]
-}
-
-```
-
-## Drug Wildcard Query (One query, many results)
-We hope to support the same type of wildcard queries for drugs/therauptics, but that is not currently supported.
-
-# CHP Query Semantics
-TODO: Explain biolink edge semantics and node types
 
 # API Documentation
 * [CHP Client API Reference](docs/chp_client_reference.md#docs/chp_client_reference.md#chp-client-reference)
