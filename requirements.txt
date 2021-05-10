@@ -1,3 +1,4 @@
 requests
-submodules/reasoner-validator
 bmt
+git+https://github.com/di2ag/reasoner-validator#egg=reasoner-validator
+git+https://github.com/di2ag/trapi_model#egg=trapi_model
