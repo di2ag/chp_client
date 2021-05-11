@@ -24,6 +24,10 @@ The *chp_client* is a lightweight Python client for the NCATS Connections Hypoth
     2. [reasoner-validator](https://github.com/di2ag/reasoner-validator)
   
 # Installation
+```
+pip3 install git+https://github.com/di2ag/chp_client#egg=chp_client
+```
+or, 
 ``` 
 pip3 install -r requirements.txt
 python3 setup.py install 
