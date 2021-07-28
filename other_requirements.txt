@@ -1,0 +1,2 @@
+git+git://github.com/di2ag/reasoner-validator@production#egg=reasoner-validator
+git+https://github.com/di2ag/trapi_model@production#egg=trapi_model
